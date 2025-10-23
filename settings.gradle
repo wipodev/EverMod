@@ -1,0 +1,21 @@
+pluginManagement {
+    repositories {
+	mavenCentral()
+        gradlePluginPortal()
+        maven {
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net/'
+        }
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.0'
+}
+
+rootProject.name = "EverMod"
+
+//include("evermod-base")
+//include("evermod-1.19.2")
+//include("evermod-1.20.1")
+//include("mods:SilentMask")

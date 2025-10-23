@@ -1,0 +1,15 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+}
+
+subprojects {
+    apply plugin: 'java'
+    java.withSourcesJar()
+    java.withJavadocJar()
+
+    repositories {
+        mavenCentral()
+    }
+}
