@@ -1,0 +1,3 @@
+[submodule "mods/SilentMask"]
+	path = mods/SilentMask
+	url = https://github.com/wipodev/SilentMask.git
