@@ -18,4 +18,4 @@ rootProject.name = "EverMod"
 //include("evermod-base")
 //include("evermod-1.19.2")
 //include("evermod-1.20.1")
-//include("mods:SilentMask")
+include("mods:SilentMask")

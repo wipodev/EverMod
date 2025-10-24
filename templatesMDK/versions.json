@@ -1,0 +1,20 @@
+{
+  "1.19.2": {
+    "template": "build-1.19.2.gradle",
+    "forge_version": "43.5.0",
+    "forge_version_mayor": "43",
+    "minecraft_version_range": "[1.19.2,1.20)"
+  },
+  "1.20.1": {
+    "template": "build-1.20.1.gradle",
+    "forge_version": "47.4.10",
+    "forge_version_mayor": "47",
+    "minecraft_version_range": "[1.20.1,1.21)"
+  },
+  "1.21": {
+    "template": "build-1.21.gradle",
+    "forge_version": "51.0.33",
+    "forge_version_mayor": "51",
+    "minecraft_version_range": "[1.21,1.22)"
+  }
+}
