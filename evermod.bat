@@ -108,7 +108,7 @@ if "%mcVersion%"=="" set "mcVersion=1.19.2"
 
 set "TEMPLATES=templatesMDK"
 set "CONFIG=%TEMPLATES%\versions.json"
-set "MODS_DIR=mods\%modName%"
+set "MODS_DIR=%modName%"
 
 if not exist "%CONFIG%" (
     echo ❌ No se encontró el archivo %CONFIG%.
