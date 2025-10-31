@@ -3,7 +3,8 @@ package net.evermod.common.network;
 import java.util.function.Supplier;
 import net.evermod.common.network.io.*;
 import net.evermod.common.network.packets.PacketBase;
-import net.minecraft.resources.ResourceLocation;
+import net.evermod.common.network.packets.PlaySoundPacketBase;
+import net.evermod.common.resources.EverLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
@@ -27,12 +28,13 @@ public class ChannelManager {
   }
 
   /** Permite usar un nombre de canal personalizado si se desea. */
-  @SuppressWarnings("removal")
   public static void register(String modid, String channelName) {
-    CHANNEL = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(modid, channelName))
+    CHANNEL = NetworkRegistry.ChannelBuilder.named(EverLocation.parse(modid, channelName))
         .networkProtocolVersion(() -> PROTOCOL_VERSION)
         .clientAcceptedVersions(PROTOCOL_VERSION::equals)
         .serverAcceptedVersions(PROTOCOL_VERSION::equals).simpleChannel();
+
+    registerMessage(PlaySoundPacketBase.class);
   }
 
   /** Registra un paquete universal EverMod. */

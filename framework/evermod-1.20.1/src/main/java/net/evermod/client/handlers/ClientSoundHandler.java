@@ -1,0 +1,54 @@
+package net.evermod.client.handlers;
+
+import net.evermod.client.sounds.SoundController;
+import net.evermod.common.network.packets.PlaySoundPacketBase;
+import net.evermod.common.resources.EverLocation;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraftforge.registries.ForgeRegistries;
+
+/**
+ * Lado cliente — ejecuta la reproducción del sonido recibido por red.
+ */
+public class ClientSoundHandler {
+
+  public static void handle(PlaySoundPacketBase msg) {
+    ClientLevel level = Minecraft.getInstance().level;
+    if (level == null) {
+      return;
+    }
+
+    String state = msg.getState();
+    if (state == null) {
+      return;
+    }
+
+    if (state.equals("stop_all")) {
+      SoundController.stopAll();
+      return;
+    }
+
+    Entity entity = level.getEntity(msg.getEntityId());
+    if (entity == null) {
+      return;
+    }
+
+    SoundEvent sound =
+        ForgeRegistries.SOUND_EVENTS.getValue(EverLocation.parse(msg.getSoundLocation()));
+    if (sound == null) {
+      return;
+    }
+
+    switch (state) {
+      case "play" -> SoundController.play(entity, sound, SoundSource.HOSTILE, msg.getVolume(),
+          msg.getPitch(), msg.isLooping());
+      case "update" -> SoundController.setVolume(entity, sound, msg.getVolume(), msg.getPitch());
+      case "stop" -> SoundController.stop(entity, sound);
+      default -> {
+      }
+    }
+  }
+}
