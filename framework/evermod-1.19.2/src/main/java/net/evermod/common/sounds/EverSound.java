@@ -6,12 +6,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 
-/**
- * API universal para reproducción de sonidos a través de red.
- * 
- * Proporciona métodos simplificados para reproducir sonidos desde el servidor hacia uno o varios
- * clientes, sin necesidad de crear ni registrar manualmente paquetes de red.
- */
 public class EverSound {
 
   /**

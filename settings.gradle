@@ -10,12 +10,11 @@ pluginManagement {
 }
 
 plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.0'
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.10.0'
 }
 
 rootProject.name = "EverMod"
 
-include("framework:evermod-base")
 include("framework:evermod-1.19.2")
 include("framework:evermod-1.20.1")
 include("framework:evermod-1.21")

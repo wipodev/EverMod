@@ -1,7 +1,7 @@
 package net.evermod.client.handlers;
 
 import net.evermod.client.sounds.SoundController;
-import net.evermod.common.network.packets.PlaySoundPacketBase;
+import net.evermod.common.network.packets.PlaySoundPacket;
 import net.evermod.common.resources.EverLocation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -10,12 +10,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.registries.ForgeRegistries;
 
-/**
- * Lado cliente — ejecuta la reproducción del sonido recibido por red.
- */
 public class ClientSoundHandler {
 
-  public static void handle(PlaySoundPacketBase msg) {
+  public static void handle(PlaySoundPacket msg) {
     ClientLevel level = Minecraft.getInstance().level;
     if (level == null) {
       return;
@@ -36,8 +33,12 @@ public class ClientSoundHandler {
       return;
     }
 
-    SoundEvent sound =
-        ForgeRegistries.SOUND_EVENTS.getValue(EverLocation.parse(msg.getSoundLocation()));
+    String soundLocation = msg.getSoundLocation();
+    if (soundLocation == null) {
+      return;
+    }
+
+    SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(EverLocation.parse(soundLocation));
     if (sound == null) {
       return;
     }

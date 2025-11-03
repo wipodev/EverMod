@@ -58,7 +58,9 @@ public class SoundController {
   public static void stopAll() {
     for (Map<SoundEvent, VariableVolumeSound> soundMap : activeSounds.values()) {
       for (SoundInstance instance : soundMap.values()) {
-        Minecraft.getInstance().getSoundManager().stop(instance);
+        if (instance != null) {
+          Minecraft.getInstance().getSoundManager().stop(instance);
+        }
       }
     }
 
