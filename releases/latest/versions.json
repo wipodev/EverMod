@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "version": "1.0.0",
+  "status": "stable",
+  "date": "2025-11-03",
+  "modules": {
+    "1.19.2": {
+      "path": "releases/1.0.0/evermod-1.19.2.zip",
+      "size": "7KB",
+      "sha256": "ebf37e3c5084e5f33d1d474c69e0d66e7fe46ab9d9aa02932088c01eb874b88b"
+    },
+    "1.20.1": {
+      "path": "releases/1.0.0/evermod-1.20.1.zip",
+      "size": "7KB",
+      "sha256": "82192d84aa6f68aa2d33de7a4c31e09e0ee4a030ca0a051f417e55d2490ef3f2"
+    },
+    "1.21": {
+      "path": "releases/1.0.0/evermod-1.21.zip",
+      "size": "7KB",
+      "sha256": "b4f3c669ec5077cfca09a0d63d47847b052ba0432cb488952bdfa448949e983f"
+    }
+  },
+  "workspace": {
+    "path": "releases/1.0.0/evermod-framework.zip",
+    "size": "82KB",
+    "sha256": "e3a7f9489fab2784f2ac5e64d935ddc7b682ddf6e0717ca4b3aecf87eec266ee"
+  }
+}
