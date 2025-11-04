@@ -1,5 +1,9 @@
 # 🌍 EverMod Framework
 
+<p align="center">
+<img src="./assets/logo.png" alt="logo" width="60%">
+</p>
+
 **EverMod** es un _framework universal para mods de Minecraft Forge_, diseñado para que tus mods puedan desarrollarse **una sola vez** y compilarse para diferentes versiones de Minecraft sin modificar su código fuente.
 
 Su nombre proviene de la idea de crear **"mods para siempre"**, que solo necesiten cambiar la dependencia de EverMod correspondiente a la versión del juego.
