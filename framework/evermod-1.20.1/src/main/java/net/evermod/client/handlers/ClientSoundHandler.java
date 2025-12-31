@@ -1,8 +1,8 @@
 package net.evermod.client.handlers;
 
 import net.evermod.client.sounds.SoundController;
-import net.evermod.common.network.packets.PlaySoundPacket;
-import net.evermod.common.resources.EverLocation;
+import net.evermod.network.packets.PlaySoundPacket;
+import net.evermod.resources.EverLocation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.sounds.SoundEvent;
