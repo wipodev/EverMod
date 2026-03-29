@@ -27,7 +27,7 @@ Each EverMod version module contains the same **API interface**, but adapted to 
 
 ## ⚙️ Working With the EverMod Framework
 
-EverMod supports four integration methods. While all rely on physical source injection to avoid runtime conflicts, the Multi-Project method is the official recommendation for professional cross-version development.
+EverMod supports four integration methods. While all rely on physical source injection to avoid runtime conflicts, the Multi-Version method is the official recommendation for professional cross-version development.
 
 ### 1️⃣ Multi-Version Method (Official & Recommended) ⭐
 
