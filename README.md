@@ -13,10 +13,9 @@ EverMod simplifies mod development and maintenance by providing pre-built module
 ```bash
 /EverMod/
 │
-├── framework/                    # Core EverMod modules
-│   ├── evermod-1.19.2/           # Implementation for Forge 1.19.2
-│   ├── evermod-1.20.1/           # Implementation for Forge 1.20.1
-│   └── evermod-1.21/             # Implementation for Forge 1.21
+├── evermod-1.19.2/           # Implementation for Forge 1.19.2
+├── evermod-1.20.1/           # Implementation for Forge 1.20.1
+├── evermod-1.21/             # Implementation for Forge 1.21
 ├── .gitattributes
 ├── .gitignore
 └── README.md
@@ -28,16 +27,75 @@ Each EverMod version module contains the same **API interface**, but adapted to 
 
 ## ⚙️ Working With the EverMod Framework
 
-EverMod supports **three official integration methods**, depending on
-your project scale and maintenance strategy. All methods rely on
-**physical source injection**, avoiding runtime dependencies and Forge
-plugin conflicts.
+EverMod supports four integration methods. While all rely on physical source injection to avoid runtime conflicts, the Multi-Project method is the official recommendation for professional cross-version development.
 
-### 1️⃣ Standalone Mod Method (Recommended)
+### 1️⃣ Multi-Version Method (Official & Recommended) ⭐
 
-The **official and recommended** EverMod configuration.\
-The framework lives inside the mod folder (preferably as a Git
-submodule) and is treated as a **passive source container**.
+The most robust way to manage a single mod codebase across multiple Minecraft versions. It uses a **centralized root** to manage shared logic and specific "project containers" for each version.
+
+#### Folder Structure
+
+```text
+MyMod_Root/
+├── EverMod/                # Git Submodule
+├── common/                 # YOUR MOD CODE (Single source of truth)
+│   └── src/main/java/      # Common logic using EverMod API
+├── projects/               # Version-specific build containers
+│   ├── forge-1.19.2/
+│   ├── forge-1.20.1/
+│   └── forge-1.21/
+├── build.gradle            # Global logic & task centralization
+├── settings.gradle         # Subproject auto-discovery
+└── gradle.properties       # Global mod metadata (ID, Name, Version)
+```
+
+#### Why use this?
+
+- **Single Source:** Edit your mod once in `/common`, and it updates for all versions.
+- **Centralized Metadata:** Change your mod version or authors in the root `gradle.properties` only once.
+- **No Branching:** Switch between Minecraft versions in your IDE without changing Git branches.
+- **Batch Compilation:** Run `./gradlew build` to generate all version JARs at once.
+
+#### settings.gradle
+
+```gradle
+rootProject.name = "MyPrivateMod"
+include("EverMod")
+include("common")
+
+file('projects').eachDir { dir ->
+    if (new File(dir, 'build.gradle').exists()) {
+        include "projects:${dir.name}"
+    }
+}
+```
+
+#### build.gradle
+
+In this recommended setup, your version-specific `build.gradle` (e.g., `projects/forge-1.21/build.gradle`) stays clean by injecting both sources:
+
+```gradle
+sourceSets {
+    main {
+        java {
+	          srcDirs = [
+                project(":common").file("src/main/java"),
+                project(":EverMod").file("evermod-${minecraft_version}/src/main/java")
+            ]
+        }
+	      resources {
+            srcDirs = [
+                project(":common").file("src/main/resources"),
+                "src/generated/resources"
+            ]
+        }
+    }
+}
+```
+
+### 2️⃣ Standalone Mod Method (Legacy / Single Version)
+
+The framework lives inside a standard Forge mod folder. Best for mods that only target one specific version or developers who prefer manual branch management.
 
 #### Folder Structure
 
@@ -65,41 +123,26 @@ include("EverMod")
 sourceSets {
     main {
         java {
-            srcDir project(":EverMod")
-                .file("evermod-${minecraft_version}/src/main/java")
-        }
-    }
-}
-
-minecraft {
-    runs {
-        configureEach {
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
+            srcDir project(":EverMod").file("evermod-${minecraft_version}/src/main/java")
         }
     }
 }
 ```
 
-### 2️⃣ Workspace Method (Shared Development Environment)
+### 3️⃣ Workspace Method (Shared Development Environment)
 
-Best suited for developers working on **multiple mods simultaneously**
-that depend on the same framework.
+Best suited for developers working on multiple different mods simultaneously that all depend on the same local EverMod instance.
 
 #### Folder Structure
 
 ```text
 Workspace_Root/
-├── EverMod/
-│   └── framework/
-│       ├── evermod-1.19.2/
-│       ├── evermod-1.20.1/
-│       └── evermod-1.21/
-├── MyPrivateMod/
-└── settings.gradle
+├── EverMod/                # Git Submodule
+├── projects/               # mods folder
+│   ├── MyMod1/
+│   ├── MyMod2/
+│   └── MyMod3/
+└── settings.gradle         # Subproject auto-discovery
 ```
 
 #### settings.gradle
@@ -107,10 +150,13 @@ Workspace_Root/
 ```gradle
 rootProject.name = "evermod-workspace"
 
-include("EverMod:framework:evermod-1.19.2")
-include("EverMod:framework:evermod-1.20.1")
-include("EverMod:framework:evermod-1.21")
-include("MyPrivateMod")
+include("EverMod")
+
+file('projects').eachDir { dir ->
+    if (new File(dir, 'build.gradle').exists()) {
+        include "projects:${dir.name}"
+    }
+}
 ```
 
 #### build.gradle (Mod)
@@ -119,17 +165,15 @@ include("MyPrivateMod")
 sourceSets {
     main {
         java {
-            srcDir project(":EverMod:framework:evermod-${minecraft_version}")
-                .file("src/main/java")
+            srcDir project(":EverMod").file("evermod-${minecraft_version}/src/main/java")
         }
     }
 }
 ```
 
-### 3️⃣ Internal Integration (Vendorized Copy)
+### 4️⃣ Internal Integration (Vendorized Copy)
 
-A manual copy of the framework source. Simple but **not recommended**
-for long-term projects.
+A manual copy of the framework source into your package structure. Not recommended as it breaks framework update paths.
 
 ```text
 MyPrivateMod/
