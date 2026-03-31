@@ -27,4 +27,16 @@ public class EverBlockPos extends BlockPos {
     this(pos.getX(), pos.getY(), pos.getZ());
   }
 
+  public static BlockPos offset(BlockPos original, double x, double y, double z) {
+    return original.offset((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
+  }
+
+  public static BlockPos offset(BlockPos original, int x, int y, int z) {
+    return original.offset(x, y, z);
+  }
+
+  public static BlockPos offset(BlockPos original, Vec3i vec) {
+    return original.offset(vec);
+  }
+
 }
