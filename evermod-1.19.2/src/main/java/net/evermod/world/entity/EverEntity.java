@@ -23,6 +23,10 @@ public abstract class EverEntity extends PathfinderMob {
     this.entityData.define(accessor, defaultValue);
   }
 
+  public void everDropExperience() {
+    this.dropExperience();
+  }
+
   public Level everLevel() {
     return this.level;
   }
