@@ -30,9 +30,8 @@ public class EverItem extends Item {
       return this;
     }
 
-    @Override
     public Properties defaultDurability(int durability) {
-      super.defaultDurability(durability);
+      super.durability(durability);
       return this;
     }
 
@@ -66,9 +65,7 @@ public class EverItem extends Item {
       return this;
     }
 
-    @Override
     public Properties setNoRepair() {
-      super.setNoRepair();
       return this;
     }
 
