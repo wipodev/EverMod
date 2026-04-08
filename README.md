@@ -18,6 +18,7 @@ EverMod simplifies mod development and maintenance by providing pre-built module
 ├── evermod-1.19.2/           # Implementation for Forge 1.19.2
 ├── evermod-1.20.1/           # Implementation for Forge 1.20.1
 ├── evermod-1.21/             # Implementation for Forge 1.21
+├── evermod-1.21.1/             # Implementation for Forge 1.21.1
 ├── .gitattributes
 ├── .gitignore
 └── README.md
@@ -45,7 +46,8 @@ MyMod_Root/
 ├── projects/               # Version-specific build containers
 │   ├── forge-1.19.2/
 │   ├── forge-1.20.1/
-│   └── forge-1.21/
+│   ├── forge-1.21/
+│   └── forge-1.21.1/
 ├── build.gradle            # Global logic & task centralization
 ├── settings.gradle         # Subproject auto-discovery
 └── gradle.properties       # Global mod metadata (ID, Name, Version)
@@ -106,7 +108,8 @@ MyPrivateMod/
 ├── EverMod/
 │   ├── evermod-1.19.2/
 │   ├── evermod-1.20.1/
-│   └── evermod-1.21/
+│   ├── forge-1.21/
+│   └── forge-1.21.1/
 ├── src/main/java/
 ├── build.gradle
 └── settings.gradle
@@ -235,6 +238,7 @@ A customizable mod template that uses **Jinja2** to dynamically generate base fi
 | 1.19.2            | 43.5.0        | 17           |
 | 1.20.1            | 47.4.10       | 17           |
 | 1.21              | 51.0.33       | 21           |
+| 1.21.1            | 52.1.6        | 21           |
 
 ---
 
