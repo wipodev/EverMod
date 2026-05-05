@@ -23,6 +23,10 @@ public abstract class EverEntity extends PathfinderMob {
     this.entityData.define(accessor, defaultValue);
   }
 
+  public void onEverEntitySpawn() {
+    // Implementación opcional por el usuario
+  }
+
   public void everDropExperience() {
     this.dropExperience();
   }
