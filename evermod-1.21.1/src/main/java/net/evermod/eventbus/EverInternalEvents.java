@@ -11,7 +11,8 @@ public class EverInternalEvents {
   @SubscribeEvent
   public static void onMobFinalizeSpawn(MobSpawnEvent.FinalizeSpawn event) {
     if (event.getEntity() instanceof EverEntity everEntity) {
-      everEntity.onEverEntitySpawn();
+      everEntity.everFinalizeSpawn(event.getLevel(), event.getDifficulty(), event.getSpawnType(),
+          event.getSpawnData(), event.getSpawnTag());
     }
   }
 }
