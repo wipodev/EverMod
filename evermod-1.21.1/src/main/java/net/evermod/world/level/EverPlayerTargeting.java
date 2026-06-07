@@ -92,7 +92,7 @@ public class EverPlayerTargeting {
   public static boolean isValidTarget(Mob mob, double range, boolean invertRange,
       boolean alwaysFollow, boolean inPlane) {
     if (mob.getTarget() instanceof Player player) {
-      return isValidTarget(mob.position(), player, range, alwaysFollow, invertRange, inPlane);
+      return isValidTarget(mob.position(), player, range, invertRange, alwaysFollow, inPlane);
     }
     return false;
   }
@@ -116,7 +116,7 @@ public class EverPlayerTargeting {
 
   public static boolean isValidTarget(Mob mob, Player player, double range, boolean invertRange,
       boolean alwaysFollow, boolean inPlane) {
-    return isValidTarget(mob.position(), player, range, alwaysFollow, invertRange, inPlane);
+    return isValidTarget(mob.position(), player, range, invertRange, alwaysFollow, inPlane);
   }
 
   public static boolean isValidTarget(Vec3 origin, Player player, double range, boolean invertRange,
