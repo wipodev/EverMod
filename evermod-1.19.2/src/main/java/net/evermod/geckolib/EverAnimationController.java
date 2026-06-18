@@ -17,6 +17,13 @@ public class EverAnimationController<T extends EverAnimatable> {
         loop ? EDefaultLoopTypes.LOOP : EDefaultLoopTypes.PLAY_ONCE));
   }
 
+  public String getCurrentAnimation() {
+    if (this.internal.getCurrentAnimation() != null) {
+      return this.internal.getCurrentAnimation().animationName;
+    }
+    return "";
+  }
+
   public boolean isStopped() {
     return internal.getAnimationState() == AnimationState.Stopped;
   }
