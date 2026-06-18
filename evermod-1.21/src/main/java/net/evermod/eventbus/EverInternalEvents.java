@@ -1,6 +1,8 @@
 package net.evermod.eventbus;
 
+import net.evermod.concurrent.EverScheduler;
 import net.evermod.world.entity.EverEntity;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -13,6 +15,13 @@ public class EverInternalEvents {
     if (event.getEntity() instanceof EverEntity everEntity) {
       everEntity.everFinalizeSpawn(event.getLevel(), event.getDifficulty(), event.getSpawnType(),
           event.getSpawnData(), event.getSpawnTag());
+    }
+  }
+
+  @SubscribeEvent
+  public static void onServerTick(TickEvent.ServerTickEvent event) {
+    if (event.phase == TickEvent.Phase.END) {
+      EverScheduler.internalTick();
     }
   }
 }
