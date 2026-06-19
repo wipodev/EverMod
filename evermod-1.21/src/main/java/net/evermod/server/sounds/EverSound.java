@@ -9,88 +9,114 @@ import net.minecraft.world.entity.Entity;
 public class EverSound {
 
   /**
-   * 🔊 Reproducir.
+   * 🔊 REPRODUCIR (Hacia todos los clientes)
    */
   public static void playToAll(Entity source, SoundEvent sound) {
-    send("play", source.getId(), sound, 1.0F, 1.0F, false, null);
+    send("play", source.getId(), sound, 1.0F, 1.0F, 1.0F, 1.0F, 0, false, null);
   }
 
   public static void playToAll(Entity source, SoundEvent sound, float volume, float pitch) {
-    send("play", source.getId(), sound, volume, pitch, false, null);
+    send("play", source.getId(), sound, volume, pitch, volume, pitch, 0, false, null);
   }
 
   public static void playToAll(Entity source, SoundEvent sound, float volume, float pitch,
       boolean looping) {
-    send("play", source.getId(), sound, volume, pitch, looping, null);
+    send("play", source.getId(), sound, volume, pitch, volume, pitch, 0, looping, null);
   }
 
+  /**
+   * 🔊 REPRODUCIR (Hacia un jugador específico)
+   */
   public static void playTo(ServerPlayer player, Entity source, SoundEvent sound) {
-    send("play", source.getId(), sound, 1.0F, 1.0F, false, player);
+    send("play", source.getId(), sound, 1.0F, 1.0F, 1.0F, 1.0F, 0, false, player);
   }
 
   public static void playTo(ServerPlayer player, Entity source, SoundEvent sound, float volume,
       float pitch) {
-    send("play", source.getId(), sound, volume, pitch, false, player);
+    send("play", source.getId(), sound, volume, pitch, volume, pitch, 0, false, player);
   }
 
   public static void playTo(ServerPlayer player, Entity source, SoundEvent sound, float volume,
       float pitch, boolean looping) {
-    send("play", source.getId(), sound, volume, pitch, looping, player);
+    send("play", source.getId(), sound, volume, pitch, volume, pitch, 0, looping, player);
   }
 
   /**
-   * 🎚️ Actualizar.
+   * 🎚️ TRANSICIONES PROGRESIVAS COMBINABLES (Hacia todos los clientes)
    */
-  public static void updateVolumeToAll(Entity source, SoundEvent sound, float volume) {
-    send("update", source.getId(), sound, volume, 1.0F, false, null);
+
+  // Modificar Volumen y Pitch a la vez
+  public static void transitionToAll(Entity source, SoundEvent sound, float fromVolume,
+      float toVolume, float fromPitch, float toPitch, int lifetimeTicks, boolean loop) {
+    send("transition", source.getId(), sound, fromVolume, fromPitch, toVolume, toPitch,
+        lifetimeTicks, loop, null);
   }
 
-  public static void updatePitchToAll(Entity source, SoundEvent sound, float pitch) {
-    send("update", source.getId(), sound, 1.0F, pitch, false, null);
+  // CORRECCIÓN: Nombre explícito para evitar conflicto de firma
+  public static void transitionVolumeToAll(Entity source, SoundEvent sound, float fromVolume,
+      float toVolume, int lifetimeTicks, boolean loop) {
+    send("transition", source.getId(), sound, fromVolume, 1.0F, toVolume, 1.0F, lifetimeTicks, loop,
+        null);
   }
 
-  public static void updateToAll(Entity source, SoundEvent sound, float volume, float pitch) {
-    send("update", source.getId(), sound, volume, pitch, false, null);
-  }
-
-  public static void updateVolumeTo(ServerPlayer player, Entity source, SoundEvent sound,
-      float volume) {
-    send("update", source.getId(), sound, volume, 1.0F, false, player);
-  }
-
-  public static void updatePitchTo(ServerPlayer player, Entity source, SoundEvent sound,
-      float pitch) {
-    send("update", source.getId(), sound, 1.0F, pitch, false, player);
-  }
-
-  public static void updateTo(ServerPlayer player, Entity source, SoundEvent sound, float volume,
-      float pitch) {
-    send("update", source.getId(), sound, volume, pitch, false, player);
+  // CORRECCIÓN: Nombre explícito para evitar conflicto de firma
+  public static void transitionPitchToAll(Entity source, SoundEvent sound, float fromPitch,
+      float toPitch, int lifetimeTicks, boolean loop) {
+    send("transition", source.getId(), sound, 1.0F, fromPitch, 1.0F, toPitch, lifetimeTicks, loop,
+        null);
   }
 
   /**
-   * 🛑 Detener uno o todos.
+   * 🎚️ TRANSICIONES PROGRESIVAS COMBINABLES (Hacia un jugador específico)
+   */
+
+  // Modificar Volumen y Pitch a la vez para un jugador
+  public static void transitionTo(ServerPlayer player, Entity source, SoundEvent sound,
+      float fromVolume, float toVolume, float fromPitch, float toPitch, int lifetimeTicks,
+      boolean loop) {
+    send("transition", source.getId(), sound, fromVolume, fromPitch, toVolume, toPitch,
+        lifetimeTicks, loop, player);
+  }
+
+  // CORRECCIÓN: Nombre explícito para evitar conflicto de firma para un jugador
+  public static void transitionVolumeTo(ServerPlayer player, Entity source, SoundEvent sound,
+      float fromVolume, float toVolume, int lifetimeTicks, boolean loop) {
+    send("transition", source.getId(), sound, fromVolume, 1.0F, toVolume, 1.0F, lifetimeTicks, loop,
+        player);
+  }
+
+  // CORRECCIÓN: Nombre explícito para evitar conflicto de firma para un jugador
+  public static void transitionPitchTo(ServerPlayer player, Entity source, SoundEvent sound,
+      float fromPitch, float toPitch, int lifetimeTicks, boolean loop) {
+    send("transition", source.getId(), sound, 1.0F, fromPitch, 1.0F, toPitch, lifetimeTicks, loop,
+        player);
+  }
+
+  /**
+   * 🛑 DETENER SONIDOS
    */
   public static void stopToAll(Entity source, SoundEvent sound) {
-    send("stop", source.getId(), sound, 0, 0, false, null);
+    send("stop", source.getId(), sound, 0, 0, 0, 0, 0, false, null);
   }
 
   public static void stopTo(ServerPlayer player, Entity source, SoundEvent sound) {
-    send("stop", source.getId(), sound, 0, 0, false, player);
+    send("stop", source.getId(), sound, 0, 0, 0, 0, 0, false, player);
   }
 
   public static void stopAll() {
-    send("stop_all", 0, null, 0, 0, false, null);
+    send("stop_all", 0, null, 0, 0, 0, 0, 0, false, null);
   }
 
-  // --- Interno ---
+  // --- Método de Envío Interno Maestro ---
   private static void send(String state, int sourceId, SoundEvent sound, float volume, float pitch,
-      boolean looping, ServerPlayer player) {
+      float targetVolume, float targetPitch, int transitionTicks, boolean looping,
+      ServerPlayer player) {
     if (sound == null && !"stop_all".equals(state)) {
       return;
     }
 
-    PlaySoundPacket packet = new PlaySoundPacket(sourceId, sound, volume, pitch, state, looping);
+    PlaySoundPacket packet = new PlaySoundPacket(sourceId, sound, volume, pitch, targetVolume,
+        targetPitch, transitionTicks, state, looping);
     if (player != null) {
       ChannelManager.sendToClient(packet, player);
     } else {

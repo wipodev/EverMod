@@ -46,10 +46,17 @@ public class ClientSoundHandler {
     switch (state) {
       case "play" -> SoundController.play(entity, sound, SoundSource.HOSTILE, msg.getVolume(),
           msg.getPitch(), msg.isLooping());
-      case "update" -> SoundController.setVolume(entity, sound, msg.getVolume(), msg.getPitch());
-      case "stop" -> SoundController.stop(entity, sound);
-      default -> {
+
+      case "transition" -> {
+        // Ejecuta la reproducción con los valores iniciales (from)
+        SoundController.play(entity, sound, SoundSource.HOSTILE, msg.getVolume(), msg.getPitch(),
+            msg.isLooping());
+        // Aplica inmediatamente la transición interna hacia los valores objetivos (to)
+        SoundController.transitionSound(entity, sound, msg.getTargetVolume(), msg.getTargetPitch(),
+            msg.getTransitionTicks());
       }
+
+      case "stop" -> SoundController.stop(entity, sound);
     }
   }
 }
