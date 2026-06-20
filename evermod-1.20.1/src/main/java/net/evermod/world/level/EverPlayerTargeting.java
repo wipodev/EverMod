@@ -3,14 +3,12 @@ package net.evermod.world.level;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import net.evermod.core.EverBlockPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -174,15 +172,7 @@ public class EverPlayerTargeting {
   }
 
   public static void moveToPosition(Mob mob, Entity target, Player viewSource, double distance) {
-    Vec3 look = viewSource.getViewVector(1.0F).normalize();
-
-    double x = target.getX() + look.x * distance;
-    double y = target.getY();
-    double z = target.getZ() + look.z * distance;
-
-    BlockPos base = new EverBlockPos(x, y, z);
-    BlockPos safePos =
-        EverLevel.get(viewSource).getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, base);
+    BlockPos safePos = EverPositionHelper.getSafePosInFrontOfTarget(target, viewSource, distance);
 
     mob.setPos(safePos.getX() + 0.5, safePos.getY(), safePos.getZ() + 0.5);
 
