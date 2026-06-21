@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -70,5 +71,9 @@ public abstract class EverEntity extends PathfinderMob {
 
   public boolean onEverGround() {
     return this.isOnGround();
+  }
+
+  public DamageSource everGenericDamageSource() {
+    return DamageSource.GENERIC;
   }
 }
