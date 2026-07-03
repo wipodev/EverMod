@@ -23,7 +23,7 @@ public class VariableVolumeSound extends EntityBoundSoundInstance {
 
   public VariableVolumeSound(SoundEvent sound, SoundSource category, float volume, float pitch,
       Entity entity, boolean looping) {
-    super(sound, category, volume, pitch, entity, 0);
+    super(sound, category, volume, pitch, entity, System.currentTimeMillis());
     this.boundEntity = entity;
     this.looping = looping;
     this.currentVolume = volume;
