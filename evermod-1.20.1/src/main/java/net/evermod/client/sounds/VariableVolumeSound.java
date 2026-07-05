@@ -30,10 +30,12 @@ public class VariableVolumeSound extends EntityBoundSoundInstance {
     this.currentPitch = pitch;
     this.targetVolume = volume;
     this.targetPitch = pitch;
+    // this.relative = false;
   }
 
   @Override
   public void tick() {
+    super.tick();
     // Si la entidad muere o desaparece, el sonido se detiene
     if (this.boundEntity == null || this.boundEntity.isRemoved()) {
       this.stopSound();
