@@ -24,8 +24,12 @@ public class EverPlayerTargeting {
         randomize);
   }
 
+  public static Player findValidTarget(Level level, boolean randomize) {
+    return findValidTarget(level, new Vec3(0, 64, 0), 999999.0, false, randomize);
+  }
+
   public static Player findValidTarget(Level level) {
-    return findValidTarget(level, new Vec3(0, 64, 0), -1, false, true);
+    return findValidTarget(level, new Vec3(0, 64, 0), 999999.0, false, true);
   }
 
   public static List<Player> findValidTargets(Mob mob, double searchRange) {
@@ -144,6 +148,10 @@ public class EverPlayerTargeting {
       return isValidRange(mob.position(), player, range, invertRange, inPlane);
     }
     return false;
+  }
+
+  public static boolean isValidRange(Mob mob, Player player, double range, boolean invertRange) {
+    return isValidRange(mob.position(), player, range, invertRange, false);
   }
 
   public static boolean isValidRange(Vec3 origin, Player player, double range, boolean invertRange,
