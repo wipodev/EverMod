@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.core.object.Color;
 import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,11 +67,26 @@ public abstract class EverGeoRenderer<T extends LivingEntity & EverAnimatable>
     });
   }
 
+  @Override
+  public Color getRenderColor(T animatable, float partialTick, int packedLight) {
+    float alpha = this.getEverAlpha(animatable);
+
+    if (alpha < 1.0F) {
+      int alphaInt = Math.max(0, Math.min(255, (int) (alpha * 255.0F)));
+      return Color.ofRGBA(255, 255, 255, alphaInt);
+    }
+    return super.getRenderColor(animatable, partialTick, packedLight);
+  }
+
   public abstract RenderType getRenderType(T animatable, float partialTick, PoseStack poseStack,
       @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, int packedLight,
       ResourceLocation texture);
 
   // --- MÉTODOS HOOK ABSTRAÍDOS (Tu lógica de negocio pura) ---
+
+  protected float getEverAlpha(T animatable) {
+    return 1.0F;
+  }
 
   protected ItemStack getCustomItemForBone(EverGeoBone bone, T animatable) {
     return ItemStack.EMPTY;

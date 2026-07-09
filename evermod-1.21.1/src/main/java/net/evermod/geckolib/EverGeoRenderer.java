@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
+import software.bernie.geckolib.util.Color;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class EverGeoRenderer<T extends LivingEntity & EverAnimatable>
@@ -37,12 +38,13 @@ public abstract class EverGeoRenderer<T extends LivingEntity & EverAnimatable>
       protected ItemDisplayContext getTransformTypeForStack(GeoBone bone, ItemStack stack,
           T animatable) {
         // 1. Buscamos el contexto gráfico abstracto del mod hijo
-        EverDisplayContext everContext = 
+        EverDisplayContext everContext =
             EverGeoRenderer.this.getTransformContextForBone(new EverGeoBone(bone), animatable);
-        
+
         // 2. Extraemos el enum real de Minecraft de forma interna
-        ItemDisplayContext context = (everContext != null) ? everContext.getVanilla() : ItemDisplayContext.NONE;
-        
+        ItemDisplayContext context =
+            (everContext != null) ? everContext.getVanilla() : ItemDisplayContext.NONE;
+
         return (context != ItemDisplayContext.NONE) ? context
             : super.getTransformTypeForStack(bone, stack, animatable);
       }
@@ -65,11 +67,26 @@ public abstract class EverGeoRenderer<T extends LivingEntity & EverAnimatable>
     });
   }
 
+  @Override
+  public Color getRenderColor(T animatable, float partialTick, int packedLight) {
+    float alpha = this.getEverAlpha(animatable);
+
+    if (alpha < 1.0F) {
+      int alphaInt = Math.max(0, Math.min(255, (int) (alpha * 255.0F)));
+      return Color.ofRGBA(255, 255, 255, alphaInt);
+    }
+    return super.getRenderColor(animatable, partialTick, packedLight);
+  }
+
   public abstract RenderType getRenderType(T animatable, float partialTick, PoseStack poseStack,
       @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, int packedLight,
       ResourceLocation texture);
 
   // --- MÉTODOS HOOK ABSTRAÍDOS (Tu lógica de negocio pura) ---
+
+  protected float getEverAlpha(T animatable) {
+    return 1.0F;
+  }
 
   protected ItemStack getCustomItemForBone(EverGeoBone bone, T animatable) {
     return ItemStack.EMPTY;
