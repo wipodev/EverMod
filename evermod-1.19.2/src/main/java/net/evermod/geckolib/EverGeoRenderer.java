@@ -15,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 import software.bernie.geckolib3.core.util.Color;
 import software.bernie.geckolib3.geo.render.built.GeoBone;
-import org.jetbrains.annotations.Nullable;
 
 public abstract class EverGeoRenderer<T extends LivingEntity & EverAnimatable>
     extends GeoEntityRenderer<T> {
@@ -83,6 +82,13 @@ public abstract class EverGeoRenderer<T extends LivingEntity & EverAnimatable>
   }
 
   @Override
+  public RenderType getRenderType(T animatable, float partialTick, PoseStack poseStack,
+      MultiBufferSource bufferSource, VertexConsumer buffer, int packedLight,
+      ResourceLocation texture) {
+    return this.getEverRenderType(animatable, texture);
+  }
+
+  @Override
   public Color getRenderColor(T animatable, float partialTick, PoseStack poseStack,
       MultiBufferSource bufferSource, VertexConsumer buffer, int packedLight) {
     float alpha = this.getEverAlpha(animatable);
@@ -95,14 +101,28 @@ public abstract class EverGeoRenderer<T extends LivingEntity & EverAnimatable>
         packedLight);
   }
 
-  public abstract RenderType getRenderType(T animatable, float partialTick, PoseStack poseStack,
-      @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, int packedLight,
-      ResourceLocation texture);
+  @Override
+  public float getWidthScale(T animatable) {
+    return this.getEverScale(animatable).width();
+  }
 
-  // --- API PÚBLICA / HOOKS (100% IDÉNTICOS A TUS OTRAS VERSIONES) ---
+  @Override
+  public float getHeightScale(T animatable) {
+    return this.getEverScale(animatable).height();
+  }
+
+  // --- API PÚBLICA / HOOKS ---
+
+  protected RenderType getEverRenderType(T animatable, ResourceLocation texture) {
+    return RenderType.entityCutoutNoCull(texture);
+  };
 
   protected float getEverAlpha(T animatable) {
     return 1.0F;
+  }
+
+  protected EverScale getEverScale(T animatable) {
+    return EverScale.DEFAULT;
   }
 
   protected ItemStack getCustomItemForBone(EverGeoBone bone, T animatable) {

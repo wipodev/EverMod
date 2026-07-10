@@ -10,6 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
 import software.bernie.geckolib.util.Color;
@@ -68,6 +69,12 @@ public abstract class EverGeoRenderer<T extends LivingEntity & EverAnimatable>
   }
 
   @Override
+  public @Nullable RenderType getRenderType(T animatable, ResourceLocation texture,
+      @Nullable MultiBufferSource bufferSource, float partialTick) {
+    return this.getEverRenderType(animatable, texture);
+  }
+
+  @Override
   public Color getRenderColor(T animatable, float partialTick, int packedLight) {
     float alpha = this.getEverAlpha(animatable);
 
@@ -78,21 +85,37 @@ public abstract class EverGeoRenderer<T extends LivingEntity & EverAnimatable>
     return super.getRenderColor(animatable, partialTick, packedLight);
   }
 
-  public abstract RenderType getRenderType(T animatable, float partialTick, PoseStack poseStack,
-      @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, int packedLight,
-      ResourceLocation texture);
+  @Override
+  public void preRender(PoseStack poseStack, T animatable, BakedGeoModel model,
+      @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender,
+      float partialTick, int packedLight, int packedOverlay, int colour) {
 
-  // --- MÉTODOS HOOK ABSTRAÍDOS (Tu lógica de negocio pura) ---
+    EverScale scale = this.getEverScale(animatable);
+    this.scaleWidth = scale.width();
+    this.scaleHeight = scale.height();
+
+    super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick,
+        packedLight, packedOverlay, colour);
+  }
+
+  // --- MÉTODOS HOOK ABSTRAÍDOS ---
+
+  protected RenderType getEverRenderType(T animatable, ResourceLocation texture) {
+    return RenderType.entityCutoutNoCull(texture);
+  };
 
   protected float getEverAlpha(T animatable) {
     return 1.0F;
+  }
+
+  protected EverScale getEverScale(T animatable) {
+    return EverScale.DEFAULT;
   }
 
   protected ItemStack getCustomItemForBone(EverGeoBone bone, T animatable) {
     return ItemStack.EMPTY;
   }
 
-  // Ahora la firma de la API pública está unificada con tu propio enum
   protected EverDisplayContext getTransformContextForBone(EverGeoBone bone, T animatable) {
     return EverDisplayContext.NONE;
   }
