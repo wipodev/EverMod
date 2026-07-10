@@ -4,9 +4,11 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 
 public class EverAnimationEvent<T extends EverAnimatable> {
   private final AnimationEvent<T> internal;
+  private final EverAnimationController<T> controller;
 
   public EverAnimationEvent(AnimationEvent<T> internal) {
     this.internal = internal;
+    this.controller = new EverAnimationController<>(internal.getController());
   }
 
   public T getAnimatable() {
@@ -21,8 +23,7 @@ public class EverAnimationEvent<T extends EverAnimatable> {
     return internal.getLimbSwingAmount();
   }
 
-  // Aquí devolvemos nuestro controlador envuelto
   public EverAnimationController<T> getController() {
-    return new EverAnimationController<>(internal.getController());
+    return this.controller;
   }
 }

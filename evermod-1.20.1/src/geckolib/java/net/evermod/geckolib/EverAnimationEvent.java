@@ -4,9 +4,11 @@ import software.bernie.geckolib.core.animation.AnimationState;
 
 public class EverAnimationEvent<T extends EverAnimatable> {
   private final AnimationState<T> internal;
+  private final EverAnimationController<T> controller;
 
   public EverAnimationEvent(AnimationState<T> internal) {
     this.internal = internal;
+    this.controller = new EverAnimationController<>(internal.getController());
   }
 
   public T getAnimatable() {
@@ -22,6 +24,6 @@ public class EverAnimationEvent<T extends EverAnimatable> {
   }
 
   public EverAnimationController<T> getController() {
-    return new EverAnimationController<>(internal.getController());
+    return this.controller;
   }
 }

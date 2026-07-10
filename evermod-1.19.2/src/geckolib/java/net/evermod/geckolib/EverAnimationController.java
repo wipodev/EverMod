@@ -24,6 +24,10 @@ public class EverAnimationController<T extends EverAnimatable> {
     return "";
   }
 
+  public void setAnimationSpeed(double speed) {
+    this.internal.setAnimationSpeed(speed);
+  }
+
   public boolean isStopped() {
     return internal.getAnimationState() == AnimationState.Stopped;
   }
