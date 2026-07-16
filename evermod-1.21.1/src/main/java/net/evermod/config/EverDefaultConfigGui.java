@@ -54,10 +54,9 @@ public class EverDefaultConfigGui extends Screen {
   @Override
   public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
     this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-    this.list.render(guiGraphics, mouseX, mouseY, partialTick);
-    // Cambiado drawCenteredString por guiGraphics.drawCenteredString
-    guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFFFFF);
     super.render(guiGraphics, mouseX, mouseY, partialTick);
+    this.list.render(guiGraphics, mouseX, mouseY, partialTick);
+    guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFFFFF);
     this.renderCustomTooltips(guiGraphics, mouseX, mouseY);
   }
 
@@ -68,7 +67,6 @@ public class EverDefaultConfigGui extends Screen {
       List<FormattedCharSequence> tooltipLines = item.getValue();
 
       if (widget.visible && widget.isMouseOver(mouseX, mouseY) && !tooltipLines.isEmpty()) {
-        // Cambiado renderTooltip por guiGraphics.renderTooltip
         guiGraphics.renderTooltip(this.font, tooltipLines, mouseX, mouseY + 30);
         break;
       }
@@ -188,7 +186,6 @@ public class EverDefaultConfigGui extends Screen {
           int rowHeight, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
         if (rowWidgets.size() > 0) {
           AbstractWidget leftWidget = rowWidgets.get(0);
-          // Cambiado acceso directo leftWidget.x y leftWidget.y por setX() y setY()
           leftWidget.setX(left);
           leftWidget.setY(top);
           leftWidget.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -196,7 +193,6 @@ public class EverDefaultConfigGui extends Screen {
 
         if (rowWidgets.size() > 1) {
           AbstractWidget rightWidget = rowWidgets.get(1);
-          // Cambiado acceso directo rightWidget.x y rightWidget.y por setX() y setY()
           rightWidget.setX(left + 160);
           rightWidget.setY(top);
           rightWidget.render(guiGraphics, mouseX, mouseY, partialTick);
