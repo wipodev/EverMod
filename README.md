@@ -2,65 +2,71 @@
 
 # EverMod Framework
 
-## 🧩 Overview
+EverMod is a high-performance, **modular cross-version abstraction framework** designed for Minecraft Forge. It enables mod developers to write their codebase once and target multiple Minecraft versions simultaneously (from 1.19.2 through 1.21.1+) without modifying the core logic, maintaining separate Git branches, or introducing runtime performance overhead.
 
-EverMod is a **modular framework** designed to **abstract version differences** between Minecraft Forge environments. Its main goal is to allow mod developers to write their code once and **compile it for multiple Minecraft versions** without modifying the mod's source code.
+---
 
-EverMod simplifies mod development and maintenance by providing pre-built modules for each supported version of Minecraft, along with utilities for networking, sound handling, and position-based operations.
+## ⚡ Key Architectural Concepts
+
+### 📦 Compile-Time Source Injection (Zero Runtime Overhead)
+
+Unlike frameworks that rely on heavy reflection, dynamic class loading, or runtime proxying (which degrade client/server performance), EverMod injects its version-specific abstraction modules directly during the compilation phase using Gradle SourceSets. This ensures the resulting JAR contains direct, devirtualized, and optimized JVM calls tailored to each target Minecraft environment.
+
+### 🌐 Key Abstractions Provided
+
+Minecraft internals and Mojang mappings change frequently. EverMod encapsulates these breaking changes under a unified, stable API:
+
+- **Networking & Buffers (`ChannelManager`, `EverContext`, `EverBuffer`):** Bridges context differences (e.g., Minecraft 1.20.1's `NetworkEvent.Context` vs 1.21.1's `CustomPayloadEvent.Context` within [EverContext.java](https://github.com/wipodev/EverMod/blob/main/evermod-1.20.1/src/main/java/net/evermod/network/io/EverContext.java)) and abstracts packet dispatching and automatic registration via scanning.
+- **Rendering & GUI (`EverGui`):** Unifies rendering across major rendering engine rewrites, automatically handling the differences between `PoseStack` (1.19.2) and `GuiGraphics` (1.20.1+).
+- **Creative Tabs & Items (`EverItem`):** Emulates the deprecated `Item.Properties.tab(...)` builder syntax in newer versions by tracking item-tab associations in static registry maps and automatically registering them via mod-bus events (`BuildCreativeModeTabContentsEvent`).
+- **Entity & Sync Data (`EverEntity`):** Handles signature changes of sync data definitions (such as the introduction of `SynchedEntityData.Builder` in 1.21.1) and provides cross-version methods for entity level retrieval (`level` field vs `level()` method) and generic damage sources.
+- **Saved Data (`EverSavedData`):** Bridges serialization differences, shielding the developer from new data-fixing structures and registry lookups (`HolderLookup.Provider`) in 1.21+.
 
 ---
 
 ## 🏗️ Project Structure
 
-```bash
+```text
 /EverMod/
-│
-├── evermod-1.19.2/           # Implementation for Forge 1.19.2
-├── evermod-1.20.1/           # Implementation for Forge 1.20.1
-├── evermod-1.21/             # Implementation for Forge 1.21
-├── evermod-1.21.1/             # Implementation for Forge 1.21.1
+├── evermod-1.19.2/           # Abstraction module for Forge 1.19.2
+├── evermod-1.20.1/           # Abstraction module for Forge 1.20.1
+├── evermod-1.21/             # Abstraction module for Forge 1.21
+├── evermod-1.21.1/           # Abstraction module for Forge 1.21.1
 ├── .gitattributes
 ├── .gitignore
 └── README.md
 ```
 
-Each EverMod version module contains the same **API interface**, but adapted to its corresponding **Forge API and Minecraft internals**, ensuring maximum compatibility.
+Each version module exposes the exact same API signature, allowing you to link them dynamically at compile time.
 
 ---
 
-## ⚙️ Working With the EverMod Framework
+## ⚙️ Development Workflows
 
-EverMod supports four integration methods. While all rely on physical source injection to avoid runtime conflicts, the Multi-Version method is the official recommendation for professional cross-version development.
+EverMod supports several integration methodologies. The **Multi-Version Workspace** is highly recommended for production environments.
 
-### 1️⃣ Multi-Version Method (Official & Recommended) ⭐
+### 1️⃣ Multi-Version Workspace (Recommended) ⭐
 
-The most robust way to manage a single mod codebase across multiple Minecraft versions. It uses a **centralized root** to manage shared logic and specific "project containers" for each version.
+This setup manages a single shared codebase under `/common` and builds specific sub-projects for each target version.
 
-#### Folder Structure
+#### Directory Layout
 
 ```text
 MyMod_Root/
 ├── EverMod/                # Git Submodule
-├── common/                 # YOUR MOD CODE (Single source of truth)
-│   └── src/main/java/      # Common logic using EverMod API
-├── projects/               # Version-specific build containers
+├── common/                 # Single source of truth (Common logic using EverMod API)
+│   └── src/main/java/
+├── projects/               # Version-specific build targets
 │   ├── forge-1.19.2/
 │   ├── forge-1.20.1/
 │   ├── forge-1.21/
 │   └── forge-1.21.1/
-├── build.gradle            # Global logic & task centralization
+├── build.gradle            # Global build configuration
 ├── settings.gradle         # Subproject auto-discovery
-└── gradle.properties       # Global mod metadata (ID, Name, Version)
+└── gradle.properties       # Global mod metadata
 ```
 
-#### Why use this?
-
-- **Single Source:** Edit your mod once in `/common`, and it updates for all versions.
-- **Centralized Metadata:** Change your mod version or authors in the root `gradle.properties` only once.
-- **No Branching:** Switch between Minecraft versions in your IDE without changing Git branches.
-- **Batch Compilation:** Run `./gradlew build` to generate all version JARs at once.
-
-#### settings.gradle
+#### Settings Configuration (`settings.gradle`)
 
 ```gradle
 rootProject.name = "MyPrivateMod"
@@ -74,20 +80,20 @@ file('projects').eachDir { dir ->
 }
 ```
 
-#### build.gradle
+#### Build Setup for Version Subprojects (`projects/forge-1.20.1/build.gradle`):
 
-In this recommended setup, your version-specific `build.gradle` (e.g., `projects/forge-1.21/build.gradle`) stays clean by injecting both sources:
+Inject both the common logic and the corresponding EverMod adapter module:
 
 ```gradle
 sourceSets {
     main {
         java {
-	          srcDirs = [
+            srcDirs = [
                 project(":common").file("src/main/java"),
                 project(":EverMod").file("evermod-${minecraft_version}/src/main/java")
             ]
         }
-	      resources {
+        resources {
             srcDirs = [
                 project(":common").file("src/main/resources"),
                 "src/generated/resources"
@@ -97,32 +103,26 @@ sourceSets {
 }
 ```
 
-### 2️⃣ Standalone Mod Method (Legacy / Single Version)
+> [!TIP]
+> With this setup, you can switch targeted Minecraft versions inside your IDE seamlessly, compile all versions in parallel, and share all assets without maintaining separate code branches.
 
-The framework lives inside a standard Forge mod folder. Best for mods that only target one specific version or developers who prefer manual branch management.
+---
 
-#### Folder Structure
+### 2️⃣ Standalone Mod (Single Target / Legacy)
+
+Best for mods targeting only one specific version or projects using traditional Git branching strategies.
+
+#### Directory Layout
 
 ```text
 MyPrivateMod/
-├── EverMod/
-│   ├── evermod-1.19.2/
-│   ├── evermod-1.20.1/
-│   ├── forge-1.21/
-│   └── forge-1.21.1/
-├── src/main/java/
+├── EverMod/                # Git Submodule
+├── src/main/java/          # Mod code referencing EverMod API
 ├── build.gradle
 └── settings.gradle
 ```
 
-#### settings.gradle
-
-```gradle
-rootProject.name = "MyPrivateMod"
-include("EverMod")
-```
-
-#### build.gradle
+#### Gradle Setup (`build.gradle`)
 
 ```gradle
 sourceSets {
@@ -134,27 +134,28 @@ sourceSets {
 }
 ```
 
-### 3️⃣ Workspace Method (Shared Development Environment)
+---
 
-Best suited for developers working on multiple different mods simultaneously that all depend on the same local EverMod instance.
+### 3️⃣ Multi-Project Workspace
 
-#### Folder Structure
+Ideal for developers maintaining multiple independent mods that share a centralized EverMod setup.
+
+#### Directory Layout
 
 ```text
 Workspace_Root/
 ├── EverMod/                # Git Submodule
-├── projects/               # mods folder
+├── projects/               # Independent mod subprojects
 │   ├── MyMod1/
 │   ├── MyMod2/
 │   └── MyMod3/
-└── settings.gradle         # Subproject auto-discovery
+└── settings.gradle         # Workspace discovery
 ```
 
-#### settings.gradle
+#### Settings Configuration (`settings.gradle`)
 
 ```gradle
 rootProject.name = "evermod-workspace"
-
 include("EverMod")
 
 file('projects').eachDir { dir ->
@@ -164,74 +165,27 @@ file('projects').eachDir { dir ->
 }
 ```
 
-#### build.gradle (Mod)
-
-```gradle
-sourceSets {
-    main {
-        java {
-            srcDir project(":EverMod").file("evermod-${minecraft_version}/src/main/java")
-        }
-    }
-}
-```
-
-### 4️⃣ Internal Integration (Vendorized Copy)
-
-A manual copy of the framework source into your package structure. Not recommended as it breaks framework update paths.
-
-```text
-MyPrivateMod/
-└── src/main/java/
-    ├── com/my_mod/
-    └── net/evermod/
-```
-
 ---
 
-## 🧠 Core Features
+## 🚀 Core API Features
 
-### 🔌 Modular Version Abstraction
-
-Each EverMod module isolates all version-specific Forge logic.
-
-### 📡 Network Channel API
-
-Simplified packet registration using `SimpleChannel`, `EverBuffer`, and
-`EverContext`.
-
-### 🔊 Sound System API
-
-Unified sound playback and synchronization across server and client.
-
-### 🧭 Utility Helpers
-
-Teleportation helpers, reach detection, and cross-version resource
-utilities.
+- **📡 Simplified Network API:** Register and handle custom payloads effortlessly using `@EverPacket` annotations, `SimpleChannel`, `EverBuffer`, and `EverContext`.
+- **🔊 Sound Fading and Tracking:** Play, stop, transition, or fade 3D sounds bound to entities over time using `SoundController` and `VariableVolumeSound`.
+- **🧭 Navigation & Pathfinding Helpers:** Check standing safety (`isValidStandingPos`), cave properties, or evaluate paths via `EverPathEvaluator` regardless of whether the platform uses `BlockPathTypes` or `PathType`.
+- **⚔️ Cross-Version Combat & Items:** Standardize item attributes, durability, food values, and sword mechanics across vanilla registry migrations using `EverSwordItem` and `EverItemCheck`.
 
 ---
 
 ## 🧰 Complementary Tools
 
-EverMod is supported by two complementary repositories:
+EverMod is fully supported by its surrounding ecosystem:
 
-### 1. **EverMod CLI**
-
-A command-line tool for managing EverMod projects.
-
-- Create new mods using the EverMod template.
-- Keep the framework and templates updated.
-- Compile and package EverMod for distribution.
-- Add existing mods into a workspace as Git submodules.
-- Generate XML summaries for AI-assisted project documentation.
-
-### 2. **EverMod Template**
-
-A customizable mod template that uses **Jinja2** to dynamically generate base files for any Minecraft version using a **JSON version database**.
+1. **[EverMod CLI](https://github.com/wipodev/evermod-cli):** Command-line tool to bootstrap template projects, manage Git submodules, and package build versions.
+2. **[EverMod Template](https://github.com/wipodev/evermod-template):** A flexible template system using **Jinja2** to dynamically render base files based on a JSON-version database.
 
 ---
 
-## 🧩 Compatibility
+## 🧩 Compatibility Matrix
 
 | Minecraft Version | Forge Version | Java Version |
 | ----------------- | ------------- | ------------ |
@@ -254,7 +208,3 @@ Developed by **Wipodev** — [https://www.wipodev.com](https://www.wipodev.com)
 - **Main Framework:** [EverMod](https://github.com/wipodev/EverMod)
 - **CLI Tool:** [EverMod CLI](https://github.com/wipodev/evermod-cli)
 - **Template System:** [EverMod Template](https://github.com/wipodev/evermod-template)
-
----
-
-> EverMod — One codebase, multiple Minecraft versions.
