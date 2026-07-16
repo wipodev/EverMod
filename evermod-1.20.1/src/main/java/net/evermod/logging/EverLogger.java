@@ -1,5 +1,6 @@
 package net.evermod.logging;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -7,34 +8,59 @@ public class EverLogger {
 
   private final Logger logger;
   private final String modId;
-  private final boolean debugEnabled;
   private final boolean infoEnabled;
+  private final boolean logEnabled;
+  private final boolean debugEnabled;
+  private final boolean traceEnabled;
+  private final boolean warnEnabled;
   private final boolean errorEnabled;
+  private final boolean fatalEnabled;
 
   /**
    * Constructor para configurar el Logger desde el Mod que usa EverMod.
    * 
    * @param modId El identificador de tu mod (ej: "mimod")
-   * @param debug Enabled/Disabled para mensajes DEBUG
    * @param info Enabled/Disabled para mensajes INFO
+   * @param log Enabled/Disabled para mensajes LOG
+   * @param debug Enabled/Disabled para mensajes DEBUG
+   * @param trace Enabled/Disabled para mensajes TRACE
+   * @param warn Enabled/Disabled para mensajes WARN
    * @param error Enabled/Disabled para mensajes ERROR
+   * @param fatal Enabled/Disabled para mensajes FATAL
    */
-  public EverLogger(String modId, boolean debug, boolean info, boolean error) {
+  public EverLogger(String modId, boolean info, boolean log, boolean debug, boolean trace,
+      boolean warn, boolean error, boolean fatal) {
     this.modId = modId;
     this.logger = LogManager.getLogger(modId);
-    this.debugEnabled = debug;
     this.infoEnabled = info;
+    this.logEnabled = log;
+    this.debugEnabled = debug;
+    this.traceEnabled = trace;
+    this.warnEnabled = warn;
     this.errorEnabled = error;
+    this.fatalEnabled = fatal;
   }
 
   /**
    * Constructor simplificado con configuraciones por defecto (Todo activo).
    */
   public EverLogger(String modId) {
-    this(modId, true, true, true);
+    this(modId, true, true, true, true, true, true, true);
   }
 
   // --- MÉTODOS DE LOGUEO ---
+
+  public void info(String message, Object... args) {
+    if (infoEnabled) {
+      logger.info(getAutomaticPrefix() + message, args);
+    }
+  }
+
+  public void log(Level level, String message, Object... args) {
+    if (logEnabled) {
+      logger.log(level, getAutomaticPrefix() + message, args);
+    }
+  }
 
   public void debug(String message, Object... args) {
     if (debugEnabled) {
@@ -42,9 +68,15 @@ public class EverLogger {
     }
   }
 
-  public void info(String message, Object... args) {
-    if (infoEnabled) {
-      logger.info(getAutomaticPrefix() + message, args);
+  public void trace(String message, Object... args) {
+    if (traceEnabled) {
+      logger.trace(getAutomaticPrefix() + message, args);
+    }
+  }
+
+  public void warn(String message, Object... args) {
+    if (warnEnabled) {
+      logger.warn(getAutomaticPrefix() + message, args);
     }
   }
 
@@ -60,6 +92,12 @@ public class EverLogger {
   public void error(String message, Throwable throwable, Object... args) {
     if (errorEnabled) {
       logger.error(getAutomaticPrefix() + message, args, throwable);
+    }
+  }
+
+  public void fatal(String message, Object... args) {
+    if (fatalEnabled) {
+      logger.fatal(getAutomaticPrefix() + message, args);
     }
   }
 
