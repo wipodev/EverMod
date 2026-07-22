@@ -55,6 +55,8 @@ public class ConfigManager {
     ModFileScanData scanData = ModList.get().getModFileById(modid).getFile().getScanResult();
     ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
+    boolean hasConfigAnnotations = false;
+
     for (ModFileScanData.AnnotationData data : scanData.getAnnotations()) {
       if (data.annotationType().equals(Type.getType(EverConfigScreen.class))) {
         try {
@@ -67,6 +69,8 @@ public class ConfigManager {
 
       if (!data.annotationType().equals(Type.getType(EverConfig.class)))
         continue;
+
+      hasConfigAnnotations = true;
 
       try {
         Class<?> configClass = Class.forName(data.memberName());
@@ -109,6 +113,11 @@ public class ConfigManager {
       } catch (Exception e) {
         throw new RuntimeException("Error procesando clases de configuración", e);
       }
+    }
+
+    if (!hasConfigAnnotations && ENTRIES.isEmpty()) {
+      EverMod.LOGGER.info("No se encontraron configuraciones para el mod: " + modid + ". Omitiendo registro de pantalla y archivo config.");
+      return;
     }
 
     spec = builder.build();

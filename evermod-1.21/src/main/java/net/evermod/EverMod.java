@@ -19,7 +19,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 public class EverMod {
   public static final String AUTHOR = "Wipodev";
   public static final String FRAMEWORK_NAME = "EverMod Framework";
-  public static final String VERSION = "3.0.0";
+  public static final String VERSION = "2.0.0";
   public static final EverLogger LOGGER = new EverLogger("EverMod");
 
   /**
