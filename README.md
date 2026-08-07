@@ -16,7 +16,7 @@ Escribe la lógica de tu mod una sola vez y compílalo para múltiples versiones
 
 Crear mods para Minecraft suele requerir mantener múltiples ramas de código o rehacer el proyecto cada vez que Mojang cambia las APIs internas del juego.
 
-**EverMod** resuelve este problema ofreciendo una capa de abstracción unificada. Te permite desarrollar sobre un único código base (`common`) y adaptar tu mod automáticamente a diferentes versiones de Minecraft durante la fase de compilación.
+**EverMod** resuelve este problema ofreciendo una capa de abstracción unificada. Te permite desarrollar sobre un único código base (`src`) y adaptar tu mod automáticamente a diferentes versiones de Minecraft durante la fase de compilación.
 
 ### ✨ Características Principales
 
@@ -33,7 +33,7 @@ En lugar de ralentizar el juego mientras el usuario juega, EverMod conecta el m�
 
 ```text
                         ┌─────────────────────────────────┐
-                        │     /common (Tu Código Base)    │
+                        │     /src (Tu Código Base)    │
                         └────────────────┬────────────────┘
                                          │
                   ┌──────────────────────┴──────────────────────┐
