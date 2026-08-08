@@ -1,18 +1,19 @@
 package net.evermod.client.event;
 
+import net.evermod.client.gui.EverGraphics;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
 public abstract class EverRenderGuiOverlayEvent extends Event {
-  private final Object graphics;
+  private final EverGraphics graphics;
   private final float partialTick;
   private final String overlayId;
   private final int width;
   private final int height;
 
-  protected EverRenderGuiOverlayEvent(Object graphics, float partialTick, String overlayId,
+  protected EverRenderGuiOverlayEvent(Object nativeGraphics, float partialTick, String overlayId,
       int width, int height) {
-    this.graphics = graphics;
+    this.graphics = new EverGraphics(nativeGraphics);
     this.partialTick = partialTick;
     this.overlayId = overlayId;
     this.width = width;

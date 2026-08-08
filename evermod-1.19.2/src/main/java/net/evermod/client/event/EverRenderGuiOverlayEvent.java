@@ -1,25 +1,37 @@
 package net.evermod.client.event;
 
+import net.evermod.client.gui.EverGraphics;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
+/**
+ * Event fired during GUI overlay rendering in EverMod.
+ * Wraps the native render context into an EverGraphics wrapper.
+ *
+ * @author Wipodev
+ */
 public abstract class EverRenderGuiOverlayEvent extends Event {
-  private final Object graphics;
+  private final EverGraphics graphics;
   private final float partialTick;
   private final String overlayId;
   private final int width;
   private final int height;
 
-  protected EverRenderGuiOverlayEvent(Object graphics, float partialTick, String overlayId,
+  protected EverRenderGuiOverlayEvent(Object nativeGraphics, float partialTick, String overlayId,
       int width, int height) {
-    this.graphics = graphics;
+    this.graphics = new EverGraphics(nativeGraphics);
     this.partialTick = partialTick;
     this.overlayId = overlayId;
     this.width = width;
     this.height = height;
   }
 
-  public Object getGraphics() {
+  /**
+   * Gets the abstracted EverGraphics context.
+   *
+   * @return EverGraphics wrapper instance.
+   */
+  public EverGraphics getGraphics() {
     return graphics;
   }
 
