@@ -12,60 +12,130 @@ import net.evermod.client.gui.UIComponent;
  */
 public class Row extends ParentComponent {
 
+  /** Spacing in pixels between adjacent child components horizontally. */
   private int gap;
+
+  /** Outer inner-padding surrounding child components in pixels. */
   private int padding;
+
+  /** Cross-axis (vertical) alignment for children. Defaults to START. */
   private LayoutAlignment alignment = LayoutAlignment.START;
+
+  /** Flag indicating whether the row stretches/fixes its width rather than auto-wrapping. */
   private boolean fillWidth = false;
+
+  /** Flag indicating whether the row stretches/fixes its height rather than auto-wrapping. */
   private boolean fillHeight = false;
 
+  /**
+   * Constructs a Row layout with explicit origin position, gap, and padding.
+   *
+   * @param x       Screen X position in pixels.
+   * @param y       Screen Y position in pixels.
+   * @param gap     Horizontal spacing between child components in pixels.
+   * @param padding Outer inner-padding in pixels.
+   */
   public Row(int x, int y, int gap, int padding) {
     super(x, y, 0, 0);
     this.gap = gap;
     this.padding = padding;
   }
 
+  /**
+   * Constructs a Row layout at origin (0, 0) with a specified gap and zero padding.
+   *
+   * @param gap Horizontal spacing between child components in pixels.
+   */
   public Row(int gap) {
     this(0, 0, gap, 0);
   }
 
+  /**
+   * Constructs an empty Row layout at origin (0, 0) with zero gap and zero padding.
+   */
   public Row() {
     this(0, 0, 0, 0);
   }
 
   // --- CONFIGURATION GETTERS & SETTERS ---
 
+  /**
+   * Gets the horizontal gap between child components.
+   *
+   * @return Spacing in pixels.
+   */
   public int getGap() {
     return this.gap;
   }
 
+  /**
+   * Sets the horizontal gap between child components.
+   *
+   * @param gap Spacing in pixels.
+   * @return This container instance for method chaining.
+   */
   public Row setGap(int gap) {
     this.gap = gap;
     updateLayout();
     return this;
   }
 
+  /**
+   * Fluent alias for {@link #setGap(int)}.
+   *
+   * @param gap Spacing in pixels.
+   * @return This container instance for method chaining.
+   */
   public Row gap(int gap) {
     return setGap(gap);
   }
 
+  /**
+   * Gets current inner padding.
+   *
+   * @return Padding size in pixels.
+   */
   public int getPadding() {
     return this.padding;
   }
 
+  /**
+   * Sets container inner padding.
+   *
+   * @param padding Padding size in pixels.
+   * @return This container instance for method chaining.
+   */
   public Row setPadding(int padding) {
     this.padding = padding;
     updateLayout();
     return this;
   }
 
+  /**
+   * Fluent alias for {@link #setPadding(int)}.
+   *
+   * @param padding Padding size in pixels.
+   * @return This container instance for method chaining.
+   */
   public Row padding(int padding) {
     return setPadding(padding);
   }
 
+  /**
+   * Gets cross-axis (vertical) alignment.
+   *
+   * @return Active {@link LayoutAlignment}.
+   */
   public LayoutAlignment getAlignment() {
     return this.alignment;
   }
 
+  /**
+   * Sets cross-axis (vertical) alignment for child components.
+   *
+   * @param alignment Desired vertical alignment.
+   * @return This container instance for method chaining.
+   */
   public Row setAlignment(LayoutAlignment alignment) {
     this.alignment = alignment != null ? alignment : this.alignment;
     updateLayout();
@@ -77,8 +147,8 @@ public class Row extends ParentComponent {
   /**
    * Forces this layout to fill the specified width and height bounds.
    *
-   * @param targetWidth  Maximum width to occupy.
-   * @param targetHeight Maximum height to occupy.
+   * @param targetWidth  Maximum width to occupy in pixels.
+   * @param targetHeight Maximum height to occupy in pixels.
    * @return This container instance for method chaining.
    */
   public Row fillMaxSize(int targetWidth, int targetHeight) {
@@ -93,7 +163,7 @@ public class Row extends ParentComponent {
   /**
    * Forces this layout to fill a specified width.
    *
-   * @param targetWidth Maximum width to occupy.
+   * @param targetWidth Maximum width to occupy in pixels.
    * @return This container instance for method chaining.
    */
   public Row fillMaxWidth(int targetWidth) {
@@ -106,7 +176,7 @@ public class Row extends ParentComponent {
   /**
    * Forces this layout to fill a specified height.
    *
-   * @param targetHeight Maximum height to occupy.
+   * @param targetHeight Maximum height to occupy in pixels.
    * @return This container instance for method chaining.
    */
   public Row fillMaxHeight(int targetHeight) {
@@ -180,6 +250,9 @@ public class Row extends ParentComponent {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ParentComponent addChild(UIComponent child) {
     super.addChild(child);
@@ -187,6 +260,9 @@ public class Row extends ParentComponent {
     return this;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void render(EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
     if (!isVisible()) {

@@ -13,37 +13,69 @@ import net.minecraft.resources.ResourceLocation;
  */
 public abstract class ParentComponent extends AbstractComponent {
 
+  /**
+   * Rendering modes supported for background texture rendering.
+   */
   public enum BackgroundMode {
-    STRETCH, CENTER, TILE
+    /** Stretches the texture to cover the container's full dimensions. */
+    STRETCH,
+    /** Centers the texture within the container using its natural dimensions. */
+    CENTER,
+    /** Repeats the texture horizontally and vertically to tile the container. */
+    TILE
   }
 
+  /** The list of managed child UI components. */
   protected final List<UIComponent> children = new ArrayList<>();
+
+  /** Background color represented as an ARGB hex integer. Defaults to fully transparent. */
   protected int backgroundColor = 0x00000000;
+
+  /** Optional background texture location. */
   protected ResourceLocation backgroundImage = null;
+
+  /** Mode used to render the background texture. Defaults to STRETCH. */
   protected BackgroundMode backgroundMode = BackgroundMode.STRETCH;
+
+  /** Source texture width in pixels. */
   protected int textureWidth = 256;
+
+  /** Source texture height in pixels. */
   protected int textureHeight = 256;
+
+  /** Flag tracking whether {@link #build()} has executed. */
   private boolean initialized = false;
 
+  /**
+   * Constructs a parent container with explicit position and dimensions.
+   *
+   * @param x      Initial X position in pixels.
+   * @param y      Initial Y position in pixels.
+   * @param width  Container width in pixels.
+   * @param height Container height in pixels.
+   */
   public ParentComponent(int x, int y, int width, int height) {
     super(x, y, width, height);
   }
 
+  /**
+   * Constructs a parent container at origin (0, 0) with zero dimensions.
+   */
   public ParentComponent() {
     super();
   }
 
   /**
-     * Lifecycle method meant to be overridden by custom component subclasses
-     * to declaratively populate child components upon initialization.
-     */
+   * Lifecycle method meant to be overridden by custom component subclasses
+   * to declaratively populate child components upon initialization.
+   */
   protected void build() {
     // Default implementation does nothing. Overridden in sub-components.
   }
 
   /**
-     * Ensures child components are built exactly once before rendering or event handling.
-     */
+   * Ensures child components are built exactly once before rendering or event handling.
+   */
   protected void ensureInitialized() {
     if (!this.initialized) {
       this.initialized = true;
@@ -53,14 +85,34 @@ public abstract class ParentComponent extends AbstractComponent {
 
   // --- BACKGROUND FLUENT SETTERS ---
 
+  /**
+   * Gets the current ARGB background color.
+   *
+   * @return ARGB hex color code.
+   */
   public int getBackgroundColor() {
     return this.backgroundColor;
   }
 
+  /**
+   * Gets the active background rendering mode.
+   *
+   * @return Current {@link BackgroundMode}.
+   */
   public BackgroundMode getBackgroundMode() {
     return this.backgroundMode;
   }
 
+  /**
+   * Configures full background properties including texture, dimensions, mode, and color.
+   *
+   * @param texture       ResourceLocation of the texture.
+   * @param textureWidth  Original width of the texture image.
+   * @param textureHeight Original height of the texture image.
+   * @param mode          Scaling or tiling mode.
+   * @param ARGBColor     Solid background ARGB tint or color.
+   * @return This container instance for method chaining.
+   */
   public ParentComponent background(ResourceLocation texture, int textureWidth, int textureHeight,
       BackgroundMode mode, int ARGBColor) {
     this.backgroundImage = texture;
@@ -71,32 +123,82 @@ public abstract class ParentComponent extends AbstractComponent {
     return this;
   }
 
+  /**
+   * Configures background texture with explicit dimensions and rendering mode.
+   *
+   * @param texture       ResourceLocation of the texture.
+   * @param textureWidth  Original width of the texture image.
+   * @param textureHeight Original height of the texture image.
+   * @param mode          Scaling or tiling mode.
+   * @return This container instance for method chaining.
+   */
   public ParentComponent background(ResourceLocation texture, int textureWidth, int textureHeight,
       BackgroundMode mode) {
     return background(texture, textureWidth, textureHeight, mode, 0x00000000);
   }
 
+  /**
+   * Configures background texture with explicit dimensions using STRETCH mode.
+   *
+   * @param texture       ResourceLocation of the texture.
+   * @param textureWidth  Original width of the texture image.
+   * @param textureHeight Original height of the texture image.
+   * @return This container instance for method chaining.
+   */
   public ParentComponent background(ResourceLocation texture, int textureWidth, int textureHeight) {
     return background(texture, textureWidth, textureHeight, BackgroundMode.STRETCH);
   }
 
+  /**
+   * Configures background texture using default 256x256 dimensions, specified mode, and ARGB color.
+   *
+   * @param texture   ResourceLocation of the texture.
+   * @param mode      Scaling or tiling mode.
+   * @param ARGBColor Solid background ARGB tint or color.
+   * @return This container instance for method chaining.
+   */
   public ParentComponent background(ResourceLocation texture, BackgroundMode mode, int ARGBColor) {
     return background(texture, 256, 256, mode, ARGBColor);
   }
 
+  /**
+   * Configures background texture using default 256x256 dimensions and specified mode.
+   *
+   * @param texture ResourceLocation of the texture.
+   * @param mode    Scaling or tiling mode.
+   * @return This container instance for method chaining.
+   */
   public ParentComponent background(ResourceLocation texture, BackgroundMode mode) {
     return background(texture, 256, 256, mode);
   }
 
+  /**
+   * Configures background texture using default 256x256 dimensions and STRETCH mode.
+   *
+   * @param texture ResourceLocation of the texture.
+   * @return This container instance for method chaining.
+   */
   public ParentComponent background(ResourceLocation texture) {
     return background(texture, 256, 256, BackgroundMode.STRETCH);
   }
 
+  /**
+   * Sets a solid background ARGB color.
+   *
+   * @param ARGBColor ARGB hex color code.
+   * @return This container instance for method chaining.
+   */
   public ParentComponent background(int ARGBColor) {
     this.backgroundColor = ARGBColor;
     return this;
   }
 
+  /**
+   * Alias for {@link #background(int)}.
+   *
+   * @param ARGBColor ARGB hex color code.
+   * @return This container instance for method chaining.
+   */
   public ParentComponent backgroundColor(int ARGBColor) {
     return background(ARGBColor);
   }
@@ -104,10 +206,10 @@ public abstract class ParentComponent extends AbstractComponent {
   // --- CHILD MANAGEMENT ---
 
   /**
-   * Adds a child component to this container.
+   * Adds a child component to this container if not already present.
    *
    * @param child Component to add.
-   * @return This container instance for chainable calls.
+   * @return This container instance for method chaining.
    */
   public ParentComponent addChild(UIComponent child) {
     if (child != null && !this.children.contains(child)) {
@@ -144,6 +246,9 @@ public abstract class ParentComponent extends AbstractComponent {
 
   // --- PROPAGATED RENDERING ---
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void render(EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
     if (!isVisible()) {
@@ -163,6 +268,11 @@ public abstract class ParentComponent extends AbstractComponent {
 
   /**
    * Renders container background color or images using EverGraphics.
+   *
+   * @param graphics     Custom graphic context.
+   * @param mouseX       Current mouse cursor X.
+   * @param mouseY       Current mouse cursor Y.
+   * @param partialTicks Render partial tick delta.
    */
   protected void renderBackground(EverGraphics graphics, int mouseX, int mouseY,
       float partialTicks) {
@@ -207,6 +317,9 @@ public abstract class ParentComponent extends AbstractComponent {
 
   // --- PROPAGATED INPUT EVENTS ---
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean mouseClicked(double mouseX, double mouseY, int button) {
     if (!isVisible() || !isEnabled()) {
@@ -225,6 +338,9 @@ public abstract class ParentComponent extends AbstractComponent {
     return false;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean mouseReleased(double mouseX, double mouseY, int button) {
     if (!isVisible() || !isEnabled()) {
@@ -242,6 +358,9 @@ public abstract class ParentComponent extends AbstractComponent {
     return false;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
     if (!isVisible() || !isEnabled()) {
@@ -259,6 +378,9 @@ public abstract class ParentComponent extends AbstractComponent {
     return false;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
     if (!isVisible() || !isEnabled()) {

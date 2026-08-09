@@ -19,7 +19,10 @@ import net.minecraft.world.item.ItemStack;
  */
 public class EverGraphics extends GuiComponent {
 
+  /** The wrapped underlying native graphics context (e.g., PoseStack or GuiGraphics). */
   private final Object nativeContext;
+
+  /** The active font renderer instance for text drawing operations. */
   private final Font font;
 
   /**

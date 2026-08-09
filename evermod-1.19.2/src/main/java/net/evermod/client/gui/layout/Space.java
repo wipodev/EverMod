@@ -51,6 +51,12 @@ public class Space extends AbstractComponent {
     return new Space(0, height);
   }
 
+  /**
+   * {@inheritDoc}
+   * <p>
+   * Intentional NO-OP: Space is invisible and only occupies layout bounds.
+   * </p>
+   */
   @Override
   public void render(EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
     // Intentional NO-OP: Space is invisible and only occupies layout bounds.

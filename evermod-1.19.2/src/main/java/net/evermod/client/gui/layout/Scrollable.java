@@ -12,21 +12,31 @@ import net.evermod.client.gui.UIComponent;
  */
 public class Scrollable extends ParentComponent {
 
+  /** The inner component or container target to be scrolled within this viewport. */
   private UIComponent content;
+
+  /** Current horizontal scroll offset in pixels. */
   private int scrollX = 0;
+
+  /** Current vertical scroll offset in pixels. */
   private int scrollY = 0;
+
+  /** The scroll speed multiplier applied per wheel tick in pixels. */
   private int scrollSpeed = 12;
 
+  /** Flag enabling vertical scrolling using mouse wheel events. */
   private boolean allowVerticalScroll = true;
+
+  /** Flag enabling horizontal scrolling using mouse wheel events. */
   private boolean allowHorizontalScroll = false;
 
   /**
    * Constructs a Scrollable container with explicit position and dimensions.
    *
-   * @param x      Screen X position.
-   * @param y      Screen Y position.
-   * @param width  Viewport width.
-   * @param height Viewport height.
+   * @param x      Screen X position in pixels.
+   * @param y      Screen Y position in pixels.
+   * @param width  Viewport width in pixels.
+   * @param height Viewport height in pixels.
    */
   public Scrollable(int x, int y, int width, int height) {
     super(x, y, width, height);
@@ -35,15 +45,15 @@ public class Scrollable extends ParentComponent {
   /**
    * Constructs a Scrollable container with dimensions at default origin.
    *
-   * @param width  Viewport width.
-   * @param height Viewport height.
+   * @param width  Viewport width in pixels.
+   * @param height Viewport height in pixels.
    */
   public Scrollable(int width, int height) {
     this(0, 0, width, height);
   }
 
   /**
-   * Constructs an empty Scrollable container at origin.
+   * Constructs an empty Scrollable container at origin (0, 0).
    */
   public Scrollable() {
     this(0, 0, 0, 0);
@@ -77,46 +87,100 @@ public class Scrollable extends ParentComponent {
     return setContent(content);
   }
 
+  /**
+   * Gets the inner component managed by this scrollable viewport.
+   *
+   * @return The child {@link UIComponent} content.
+   */
   public UIComponent getContent() {
     return this.content;
   }
 
   // --- MODIFIERS & CONFIGURATION ---
 
+  /**
+   * Gets the current horizontal scroll offset.
+   *
+   * @return Scroll X offset in pixels.
+   */
   public int getScrollX() {
     return this.scrollX;
   }
 
+  /**
+   * Gets the current vertical scroll offset.
+   *
+   * @return Scroll Y offset in pixels.
+   */
   public int getScrollY() {
     return this.scrollY;
   }
 
+  /**
+   * Gets the scroll speed factor.
+   *
+   * @return Scroll speed in pixels per scroll tick.
+   */
   public int getScrollSpeed() {
     return this.scrollSpeed;
   }
 
+  /**
+   * Sets the scroll speed factor.
+   *
+   * @param scrollSpeed Desired speed in pixels (clamped to a minimum of 1).
+   * @return This container instance for method chaining.
+   */
   public Scrollable setScrollSpeed(int scrollSpeed) {
     this.scrollSpeed = Math.max(1, scrollSpeed);
     return this;
   }
 
+  /**
+   * Fluent alias for {@link #setScrollSpeed(int)}.
+   *
+   * @param scrollSpeed Desired speed in pixels.
+   * @return This container instance for method chaining.
+   */
   public Scrollable scrollSpeed(int scrollSpeed) {
     return setScrollSpeed(scrollSpeed);
   }
 
+  /**
+   * Checks whether vertical scrolling is enabled.
+   *
+   * @return {@code true} if vertical scrolling is allowed, {@code false} otherwise.
+   */
   public boolean isVerticalScrollAllowed() {
     return this.allowVerticalScroll;
   }
 
+  /**
+   * Enables or disables vertical scrolling.
+   *
+   * @param enable {@code true} to allow vertical scrolling, {@code false} to disable.
+   * @return This container instance for method chaining.
+   */
   public Scrollable enableVerticalScroll(boolean enable) {
     this.allowVerticalScroll = enable;
     return this;
   }
 
+  /**
+   * Checks whether horizontal scrolling is enabled.
+   *
+   * @return {@code true} if horizontal scrolling is allowed, {@code false} otherwise.
+   */
   public boolean isHorizontalScrollAllowed() {
     return this.allowHorizontalScroll;
   }
 
+  /**
+   * Enables or disables horizontal scrolling.
+   *
+   * @param enable {@code true} to allow horizontal scrolling, {@code false} to disable.
+   * @return This container instance for method chaining.
+   */
   public Scrollable enableHorizontalScroll(boolean enable) {
     this.allowHorizontalScroll = enable;
     return this;
@@ -145,6 +209,9 @@ public class Scrollable extends ParentComponent {
     this.content.setY(this.y - this.scrollY);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
     if (!isVisible() || !isEnabled() || !isMouseOver(mouseX, mouseY)) {
@@ -164,6 +231,9 @@ public class Scrollable extends ParentComponent {
     return super.mouseScrolled(mouseX, mouseY, delta);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void render(EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
     if (!isVisible()) {

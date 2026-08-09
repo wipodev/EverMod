@@ -1,8 +1,8 @@
 package net.evermod.client.gui.layout;
 
+import net.evermod.client.gui.EverGraphics;
 import net.evermod.client.gui.ParentComponent;
 import net.evermod.client.gui.UIComponent;
-import net.evermod.client.gui.EverGraphics;
 
 /**
  * A container layout that stacks child components directly on top of each other
@@ -12,28 +12,39 @@ import net.evermod.client.gui.EverGraphics;
  */
 public class Box extends ParentComponent {
 
+  /** Active horizontal alignment for children inside the box. Defaults to START. */
   private LayoutAlignment horizontalAlignment = LayoutAlignment.START;
+
+  /** Active vertical alignment for children inside the box. Defaults to START. */
   private LayoutAlignment verticalAlignment = LayoutAlignment.START;
+
+  /** Outer inner-padding surrounding child components in pixels. */
   private int padding = 0;
 
   /**
    * Constructs a Box layout with explicit position and bounds.
    *
-   * @param x      Screen X position.
-   * @param y      Screen Y position.
-   * @param width  Container width.
-   * @param height Container height.
+   * @param x      Screen X position in pixels.
+   * @param y      Screen Y position in pixels.
+   * @param width  Container width in pixels.
+   * @param height Container height in pixels.
    */
   public Box(int x, int y, int width, int height) {
     super(x, y, width, height);
   }
 
+  /**
+   * Constructs a Box layout with explicit dimensions at default origin (0, 0).
+   *
+   * @param width  Container width in pixels.
+   * @param height Container height in pixels.
+   */
   public Box(int width, int height) {
     this(0, 0, width, height);
   }
 
   /**
-   * Constructs a Box layout at default origin.
+   * Constructs an empty Box layout at origin with zero dimensions.
    */
   public Box() {
     super();
@@ -41,30 +52,64 @@ public class Box extends ParentComponent {
 
   // --- ALIGNMENT & PADDING SETTERS ---
 
+  /**
+   * Gets the active horizontal alignment.
+   *
+   * @return Active {@link LayoutAlignment}.
+   */
   public LayoutAlignment getHorizontalAlignment() {
     return this.horizontalAlignment;
   }
 
+  /**
+   * Sets the horizontal alignment for child components.
+   *
+   * @param alignment Desired horizontal alignment.
+   * @return This container instance for method chaining.
+   */
   public Box setHorizontalAlignment(LayoutAlignment alignment) {
     this.horizontalAlignment = alignment != null ? alignment : this.horizontalAlignment;
     updateLayout();
     return this;
   }
 
+  /**
+   * Fluent alias for {@link #setHorizontalAlignment(LayoutAlignment)}.
+   *
+   * @param alignment Desired horizontal alignment.
+   * @return This container instance for method chaining.
+   */
   public Box horizontalAlignment(LayoutAlignment alignment) {
     return setHorizontalAlignment(alignment);
   }
 
+  /**
+   * Gets the active vertical alignment.
+   *
+   * @return Active {@link LayoutAlignment}.
+   */
   public LayoutAlignment getVerticalAlignment() {
     return this.verticalAlignment;
   }
 
+  /**
+   * Sets the vertical alignment for child components.
+   *
+   * @param alignment Desired vertical alignment.
+   * @return This container instance for method chaining.
+   */
   public Box setVerticalAlignment(LayoutAlignment alignment) {
     this.verticalAlignment = alignment != null ? alignment : this.verticalAlignment;
     updateLayout();
     return this;
   }
 
+  /**
+   * Fluent alias for {@link #setVerticalAlignment(LayoutAlignment)}.
+   *
+   * @param alignment Desired vertical alignment.
+   * @return This container instance for method chaining.
+   */
   public Box verticalAlignment(LayoutAlignment alignment) {
     return setVerticalAlignment(alignment);
   }
@@ -83,16 +128,33 @@ public class Box extends ParentComponent {
     return this;
   }
 
+  /**
+   * Gets current inner padding.
+   *
+   * @return Padding size in pixels.
+   */
   public int getPadding() {
     return this.padding;
   }
 
+  /**
+   * Sets container inner padding.
+   *
+   * @param padding Padding in pixels (clamped to non-negative).
+   * @return This container instance for method chaining.
+   */
   public Box setPadding(int padding) {
     this.padding = Math.max(0, padding);
     updateLayout();
     return this;
   }
 
+  /**
+   * Fluent alias for {@link #setPadding(int)}.
+   *
+   * @param padding Padding in pixels.
+   * @return This container instance for method chaining.
+   */
   public Box padding(int padding) {
     return setPadding(padding);
   }
@@ -145,6 +207,9 @@ public class Box extends ParentComponent {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ParentComponent addChild(UIComponent child) {
     super.addChild(child);
@@ -152,18 +217,27 @@ public class Box extends ParentComponent {
     return this;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void setWidth(int width) {
     super.setWidth(width);
     updateLayout();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void setHeight(int height) {
     super.setHeight(height);
     updateLayout();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void render(EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
     if (!isVisible()) {
