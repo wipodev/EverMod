@@ -1,0 +1,192 @@
+package net.evermod.client.gui.layout;
+
+import net.evermod.client.gui.EverGraphics;
+import net.evermod.client.gui.ParentComponent;
+import net.evermod.client.gui.UIComponent;
+
+/**
+ * A layout container that clips its content within specified bounds and enables
+ * vertical or horizontal scrolling via the mouse wheel.
+ *
+ * @author Wipodev
+ */
+public class Scrollable extends ParentComponent {
+
+  private UIComponent content;
+  private int scrollX = 0;
+  private int scrollY = 0;
+  private int scrollSpeed = 12;
+
+  private boolean allowVerticalScroll = true;
+  private boolean allowHorizontalScroll = false;
+
+  /**
+   * Constructs a Scrollable container with explicit position and dimensions.
+   *
+   * @param x      Screen X position.
+   * @param y      Screen Y position.
+   * @param width  Viewport width.
+   * @param height Viewport height.
+   */
+  public Scrollable(int x, int y, int width, int height) {
+    super(x, y, width, height);
+  }
+
+  /**
+   * Constructs a Scrollable container with dimensions at default origin.
+   *
+   * @param width  Viewport width.
+   * @param height Viewport height.
+   */
+  public Scrollable(int width, int height) {
+    this(0, 0, width, height);
+  }
+
+  /**
+   * Constructs an empty Scrollable container at origin.
+   */
+  public Scrollable() {
+    this(0, 0, 0, 0);
+  }
+
+  // --- CONTENT MANAGEMENT ---
+
+  /**
+   * Sets the target content component or layout to be scrollable within this viewport.
+   *
+   * @param content Inner component or container.
+   * @return This container instance for method chaining.
+   */
+  public Scrollable setContent(UIComponent content) {
+    this.children.clear();
+    this.content = content;
+    if (content != null) {
+      super.addChild(content);
+      updateLayout();
+    }
+    return this;
+  }
+
+  /**
+   * Fluent alias for {@link #setContent(UIComponent)}.
+   *
+   * @param content Inner component or container.
+   * @return This container instance for method chaining.
+   */
+  public Scrollable content(UIComponent content) {
+    return setContent(content);
+  }
+
+  public UIComponent getContent() {
+    return this.content;
+  }
+
+  // --- MODIFIERS & CONFIGURATION ---
+
+  public int getScrollX() {
+    return this.scrollX;
+  }
+
+  public int getScrollY() {
+    return this.scrollY;
+  }
+
+  public int getScrollSpeed() {
+    return this.scrollSpeed;
+  }
+
+  public Scrollable setScrollSpeed(int scrollSpeed) {
+    this.scrollSpeed = Math.max(1, scrollSpeed);
+    return this;
+  }
+
+  public Scrollable scrollSpeed(int scrollSpeed) {
+    return setScrollSpeed(scrollSpeed);
+  }
+
+  public boolean isVerticalScrollAllowed() {
+    return this.allowVerticalScroll;
+  }
+
+  public Scrollable enableVerticalScroll(boolean enable) {
+    this.allowVerticalScroll = enable;
+    return this;
+  }
+
+  public boolean isHorizontalScrollAllowed() {
+    return this.allowHorizontalScroll;
+  }
+
+  public Scrollable enableHorizontalScroll(boolean enable) {
+    this.allowHorizontalScroll = enable;
+    return this;
+  }
+
+  // --- LAYOUT & SCROLL CONTROL ---
+
+  /**
+   * Adjusts relative inner coordinates and clamps scrolling within maximum bounds.
+   */
+  public void updateLayout() {
+    if (this.content == null) {
+      return;
+    }
+
+    // Clamp vertical scroll using viewport height vs content height
+    int maxScrollY = Math.max(0, this.content.getHeight() - this.height);
+    this.scrollY = Math.min(Math.max(this.scrollY, 0), maxScrollY);
+
+    // Clamp horizontal scroll using viewport width vs content width
+    int maxScrollX = Math.max(0, this.content.getWidth() - this.width);
+    this.scrollX = Math.min(Math.max(this.scrollX, 0), maxScrollX);
+
+    // Reposition child content based on scroll offset
+    this.content.setX(this.x - this.scrollX);
+    this.content.setY(this.y - this.scrollY);
+  }
+
+  @Override
+  public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    if (!isVisible() || !isEnabled() || !isMouseOver(mouseX, mouseY)) {
+      return false;
+    }
+
+    if (this.allowVerticalScroll) {
+      this.scrollY -= (int) (delta * this.scrollSpeed);
+      updateLayout();
+      return true;
+    } else if (this.allowHorizontalScroll) {
+      this.scrollX -= (int) (delta * this.scrollSpeed);
+      updateLayout();
+      return true;
+    }
+
+    return super.mouseScrolled(mouseX, mouseY, delta);
+  }
+
+  @Override
+  public void render(EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    if (!isVisible()) {
+      return;
+    }
+
+    ensureInitialized();
+    updateLayout();
+
+    // 1. Draw container background
+    renderBackground(graphics, mouseX, mouseY, partialTicks);
+
+    // 2. Restrict rendering viewport using EverGraphics scissor method
+    graphics.activateScissor(this.x, this.y, this.width, this.height);
+
+    // 3. Render inner content
+    for (UIComponent child : this.children) {
+      if (child.isVisible()) {
+        child.render(graphics, mouseX, mouseY, partialTicks);
+      }
+    }
+
+    // 4. Disable scissor clipping
+    graphics.deactivateScissor();
+  }
+}
