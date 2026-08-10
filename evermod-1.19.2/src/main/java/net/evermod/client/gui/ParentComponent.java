@@ -475,4 +475,24 @@ public abstract class ParentComponent extends AbstractComponent {
     }
     return false;
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean charTyped(char codePoint, int modifiers) {
+    if (!isVisible() || !isEnabled()) {
+      return false;
+    }
+
+    ensureInitialized();
+
+    for (int i = this.children.size() - 1; i >= 0; i--) {
+      UIComponent child = this.children.get(i);
+      if (child.charTyped(codePoint, modifiers)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
