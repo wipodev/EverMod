@@ -198,6 +198,6 @@ public class Divider extends AbstractComponent {
       return;
     }
 
-    graphics.fill(this.x, this.y, this.width, this.height, this.color);
+    graphics.drawRect(this.x, this.y, this.width, this.height, this.color);
   }
 }

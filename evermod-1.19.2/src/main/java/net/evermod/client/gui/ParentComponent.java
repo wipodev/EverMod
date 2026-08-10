@@ -278,7 +278,7 @@ public abstract class ParentComponent extends AbstractComponent {
       float partialTicks) {
     // 1. Render solid color background if present
     if ((this.backgroundColor >> 24 & 0xFF) > 0) {
-      graphics.fill(this.x, this.y, this.x + this.width, this.y + this.height,
+      graphics.drawRect(this.x, this.y, this.x + this.width, this.y + this.height,
           this.backgroundColor);
     }
 
