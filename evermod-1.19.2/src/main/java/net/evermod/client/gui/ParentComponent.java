@@ -43,6 +43,12 @@ public abstract class ParentComponent extends AbstractComponent {
   /** Source texture height in pixels. */
   protected int textureHeight = 256;
 
+  /** Border configuration structure. Defaults to no border. */
+  protected Border border = Border.NONE;
+
+  /** ARGB hex color code for the border. Defaults to fully transparent. */
+  protected int borderColor = 0x00000000;
+
   /** Flag tracking whether {@link #build()} has executed. */
   private boolean initialized = false;
 
@@ -81,6 +87,60 @@ public abstract class ParentComponent extends AbstractComponent {
       this.initialized = true;
       build();
     }
+  }
+
+  // --- BORDER FLUENT SETTERS ---
+
+  /**
+   * Sets custom border configuration and border color.
+   *
+   * @param border Custom border structure containing edge thicknesses.
+   * @param borderColor ARGB hex color code for the border.
+   * @return This container instance for method chaining.
+   */
+  public ParentComponent border(Border border, int borderColor) {
+    this.border = border;
+    this.borderColor = borderColor;
+    return this;
+  }
+
+  /**
+   * Sets a uniform border of the specified thickness and color.
+   *
+   * @param thickness Uniform thickness in pixels for all sides.
+   * @param borderColor ARGB hex color code for the border.
+   * @return This container instance for method chaining.
+   */
+  public ParentComponent border(int thickness, int borderColor) {
+    return border(Border.all(thickness), borderColor);
+  }
+
+  /**
+   * Sets a standard 1px border with the specified color.
+   *
+   * @param borderColor ARGB hex color code for the border.
+   * @return This container instance for method chaining.
+   */
+  public ParentComponent border(int borderColor) {
+    return border(Border.DEFAULT, borderColor);
+  }
+
+  /**
+   * Gets the active border structure.
+   *
+   * @return Active {@link Border}.
+   */
+  public Border getBorder() {
+    return this.border;
+  }
+
+  /**
+   * Gets the active border ARGB color.
+   *
+   * @return ARGB color code.
+   */
+  public int getBorderColor() {
+    return this.borderColor;
   }
 
   // --- BACKGROUND FLUENT SETTERS ---
@@ -267,26 +327,32 @@ public abstract class ParentComponent extends AbstractComponent {
   }
 
   /**
-   * Renders container background color or images using EverGraphics.
+   * Renders container background color, texture image, and overlay borders using EverGraphics.
    *
-   * @param graphics     Custom graphic context.
-   * @param mouseX       Current mouse cursor X.
-   * @param mouseY       Current mouse cursor Y.
+   * @param graphics Custom graphic context.
+   * @param mouseX Current mouse cursor X.
+   * @param mouseY Current mouse cursor Y.
    * @param partialTicks Render partial tick delta.
    */
   protected void renderBackground(EverGraphics graphics, int mouseX, int mouseY,
       float partialTicks) {
-    // 1. Render solid color background if present
+    boolean hasBorder = (this.borderColor >> 24 & 0xFF) > 0 && this.border != Border.NONE;
+
+    // 1. Render solid color background
     if ((this.backgroundColor >> 24 & 0xFF) > 0) {
-      graphics.drawRect(this.x, this.y, this.x + this.width, this.y + this.height,
-          this.backgroundColor);
+      if (hasBorder) {
+        graphics.drawBorderedRect(this.x, this.y, this.width, this.height,
+            this.backgroundColor, this.border, this.borderColor);
+      } else {
+        graphics.drawRect(this.x, this.y, this.x + this.width, this.y + this.height,
+            this.backgroundColor);
+      }
     }
 
-    // 2. Render background image if set according to BackgroundMode
+    // 2. Render background image if set
     if (this.backgroundImage != null) {
       switch (this.backgroundMode) {
         case CENTER:
-          // Correctly center the image based on real texture dimensions
           int centerX = this.x + (this.width - this.textureWidth) / 2;
           int centerY = this.y + (this.height - this.textureHeight) / 2;
           graphics.drawTexture(this.backgroundImage, centerX, centerY, this.textureWidth,
@@ -294,7 +360,6 @@ public abstract class ParentComponent extends AbstractComponent {
           break;
 
         case TILE:
-          // Tile image horizontally and vertically across the container bounds
           for (int tileX = 0; tileX < this.width; tileX += this.textureWidth) {
             for (int tileY = 0; tileY < this.height; tileY += this.textureHeight) {
               int drawWidth = Math.min(this.textureWidth, this.width - tileX);
@@ -308,10 +373,23 @@ public abstract class ParentComponent extends AbstractComponent {
 
         case STRETCH:
         default:
-          graphics.drawTexture(this.backgroundImage, this.x, this.y, this.width, this.height,
-              this.textureWidth, this.textureHeight);
+          if (hasBorder) {
+            graphics.drawBorderTexture(this.backgroundImage, this.x, this.y, this.width,
+                this.height,
+                this.textureWidth, this.textureHeight, this.border, this.borderColor);
+          } else {
+            graphics.drawTexture(this.backgroundImage, this.x, this.y, this.width, this.height,
+                this.textureWidth, this.textureHeight);
+          }
           break;
       }
+    }
+
+    // 3. Render standalone border outline if there was no solid background color or stretched image
+    if (hasBorder && (this.backgroundColor >> 24 & 0xFF) == 0
+        && (this.backgroundImage == null || this.backgroundMode != BackgroundMode.STRETCH)) {
+      graphics.drawOutlineRect(this.x, this.y, this.width, this.height, this.border,
+          this.borderColor);
     }
   }
 
