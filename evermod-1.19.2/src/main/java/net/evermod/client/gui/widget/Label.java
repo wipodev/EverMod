@@ -33,7 +33,8 @@ public class Label extends AbstractComponent {
   // --- CONSTRUCTORS ---
 
   /**
-   * Constructs a Label with a rich Minecraft Component.
+   * Constructs a Label displaying a formatted Minecraft Component text.
+   * Automatically calculates initial dimensions based on the component's width and font height.
    *
    * @param component Formatted Minecraft Component text.
    */
@@ -45,7 +46,8 @@ public class Label extends AbstractComponent {
   }
 
   /**
-   * Constructs a Label with plain string text.
+   * Constructs a Label displaying a plain string text.
+   * Automatically calculates initial dimensions based on the text string's width and font height.
    *
    * @param text Plain string text.
    */
@@ -59,7 +61,7 @@ public class Label extends AbstractComponent {
   // --- AUTO-SIZING UTILITY ---
 
   /**
-   * Automatically calculates and updates component width and height
+   * Automatically calculates and updates the component width and height
    * using Minecraft's active font metrics.
    */
   public void autoSize() {
@@ -77,7 +79,7 @@ public class Label extends AbstractComponent {
   // --- GETTERS & SETTERS (FLUENT API) ---
 
   /**
-   * Gets the current plain text string, or its visual text representation if Component is used.
+   * Gets the current plain text string, or its visual text string representation if a Component is used.
    *
    * @return Text string representation.
    */
@@ -89,9 +91,9 @@ public class Label extends AbstractComponent {
   }
 
   /**
-   * Sets new plain string text and recalculates text bounds.
+   * Sets new plain string text and recalculates text bounding dimensions.
    *
-   * @param text Plain text.
+   * @param text Plain text string.
    * @return This label instance for method chaining.
    */
   public Label setText(String text) {
@@ -104,7 +106,7 @@ public class Label extends AbstractComponent {
   /**
    * Fluent alias for {@link #setText(String)}.
    *
-   * @param text Plain text.
+   * @param text Plain text string.
    * @return This label instance for method chaining.
    */
   public Label text(String text) {
@@ -114,14 +116,14 @@ public class Label extends AbstractComponent {
   /**
    * Gets the current rich Minecraft Component text.
    *
-   * @return Minecraft Component or null if plain text is used.
+   * @return Active Minecraft Component, or {@code null} if plain text is used.
    */
   public Component getComponent() {
     return this.component;
   }
 
   /**
-   * Sets new rich Minecraft Component text and recalculates text bounds.
+   * Sets new rich Minecraft Component text and recalculates text bounding dimensions.
    *
    * @param component Formatted Minecraft Component text.
    * @return This label instance for method chaining.
@@ -144,9 +146,9 @@ public class Label extends AbstractComponent {
   }
 
   /**
-   * Gets the current ARGB color.
+   * Gets the current ARGB rendering color code.
    *
-   * @return ARGB color code.
+   * @return ARGB hex color code.
    */
   public int getColor() {
     return this.color;
@@ -155,7 +157,7 @@ public class Label extends AbstractComponent {
   /**
    * Sets the ARGB text rendering color.
    *
-   * @param color ARGB hex color code.
+   * @param color ARGB hex color code (e.g., {@code 0xFFFFFFFF}).
    * @return This label instance for method chaining.
    */
   public Label setColor(int color) {
@@ -174,18 +176,18 @@ public class Label extends AbstractComponent {
   }
 
   /**
-   * Checks if drop shadow is enabled.
+   * Checks whether the text drop shadow rendering is enabled.
    *
-   * @return True if drop shadow is enabled.
+   * @return {@code true} if drop shadow is rendered, {@code false} otherwise.
    */
   public boolean isShadow() {
     return this.shadow;
   }
 
   /**
-   * Sets whether to render a drop shadow behind text.
+   * Sets whether to render a drop shadow behind the text.
    *
-   * @param shadow True to draw shadow.
+   * @param shadow {@code true} to enable drop shadow, {@code false} to disable it.
    * @return This label instance for method chaining.
    */
   public Label setShadow(boolean shadow) {
@@ -196,7 +198,7 @@ public class Label extends AbstractComponent {
   /**
    * Fluent alias for {@link #setShadow(boolean)}.
    *
-   * @param shadow True to draw shadow.
+   * @param shadow {@code true} to enable drop shadow, {@code false} to disable it.
    * @return This label instance for method chaining.
    */
   public Label shadow(boolean shadow) {
@@ -204,7 +206,7 @@ public class Label extends AbstractComponent {
   }
 
   /**
-   * Gets horizontal text alignment.
+   * Gets the horizontal text alignment relative to the widget bounding box.
    *
    * @return Active {@link LayoutAlignment}.
    */
@@ -213,9 +215,9 @@ public class Label extends AbstractComponent {
   }
 
   /**
-   * Sets horizontal text alignment within the component bounds.
+   * Sets the horizontal text alignment within the component bounds.
    *
-   * @param alignment Desired text alignment.
+   * @param alignment Desired horizontal {@link LayoutAlignment}.
    * @return This label instance for method chaining.
    */
   public Label setAlignment(LayoutAlignment alignment) {
@@ -226,7 +228,7 @@ public class Label extends AbstractComponent {
   /**
    * Fluent alias for {@link #setAlignment(LayoutAlignment)}.
    *
-   * @param alignment Desired text alignment.
+   * @param alignment Desired horizontal {@link LayoutAlignment}.
    * @return This label instance for method chaining.
    */
   public Label alignment(LayoutAlignment alignment) {
@@ -236,7 +238,13 @@ public class Label extends AbstractComponent {
   // --- RENDERING METHOD ---
 
   /**
-   * {@inheritDoc}
+   * Renders the label text onto the screen using {@link EverGraphics}, taking into account
+   * visibility, bounding box alignment, color, and drop shadow settings.
+   *
+   * @param graphics The graphics pipeline context wrapper.
+   * @param mouseX Current mouse cursor X coordinate.
+   * @param mouseY Current mouse cursor Y coordinate.
+   * @param partialTicks Partial tick time for animation frame interpolation.
    */
   @Override
   public void render(EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
