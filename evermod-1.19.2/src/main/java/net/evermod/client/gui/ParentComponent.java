@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 /**
  * Abstract base class for UI components that can contain and manage child components.
  * Propagates rendering, bounds checks, and user input events down the component hierarchy.
+ * Supports multi-colored border configurations using {@link BorderColor}.
  *
  * @author Wipodev
  */
@@ -25,31 +26,14 @@ public abstract class ParentComponent extends AbstractComponent {
     TILE
   }
 
-  /** The list of managed child UI components. */
   protected final List<UIComponent> children = new ArrayList<>();
-
-  /** Background color represented as an ARGB hex integer. Defaults to fully transparent. */
   protected int backgroundColor = 0x00000000;
-
-  /** Optional background texture location. */
   protected ResourceLocation backgroundImage = null;
-
-  /** Mode used to render the background texture. Defaults to STRETCH. */
   protected BackgroundMode backgroundMode = BackgroundMode.STRETCH;
-
-  /** Source texture width in pixels. */
   protected int textureWidth = 256;
-
-  /** Source texture height in pixels. */
   protected int textureHeight = 256;
-
-  /** Border configuration structure. Defaults to no border. */
   protected Border border = Border.NONE;
-
-  /** ARGB hex color code for the border. Defaults to fully transparent. */
-  protected int borderColor = 0x00000000;
-
-  /** Flag tracking whether {@link #build()} has executed. */
+  protected BorderColor borderColor = BorderColor.DEFAULT;
   private boolean initialized = false;
 
   /**
@@ -92,27 +76,59 @@ public abstract class ParentComponent extends AbstractComponent {
   // --- BORDER FLUENT SETTERS ---
 
   /**
-   * Sets custom border configuration and border color.
+   * Sets custom border configuration and multi-colored border.
    *
-   * @param border Custom border structure containing edge thicknesses.
-   * @param borderColor ARGB hex color code for the border.
+   * @param border      Custom border structure containing edge thicknesses.
+   * @param borderColor {@link BorderColor} structure containing ARGB colors per side.
    * @return This container instance for method chaining.
    */
-  public ParentComponent border(Border border, int borderColor) {
+  public ParentComponent border(Border border, BorderColor borderColor) {
     this.border = border;
     this.borderColor = borderColor;
     return this;
   }
 
   /**
+   * Sets custom border configuration and uniform border color.
+   *
+   * @param border      Custom border structure containing edge thicknesses.
+   * @param borderColor ARGB hex color code for the border.
+   * @return This container instance for method chaining.
+   */
+  public ParentComponent border(Border border, int borderColor) {
+    return border(border, BorderColor.all(borderColor));
+  }
+
+  /**
+   * Sets a uniform border of the specified thickness and side colors.
+   *
+   * @param thickness   Uniform thickness in pixels for all sides.
+   * @param borderColor {@link BorderColor} structure containing ARGB colors per side.
+   * @return This container instance for method chaining.
+   */
+  public ParentComponent border(int thickness, BorderColor borderColor) {
+    return border(Border.all(thickness), borderColor);
+  }
+
+  /**
    * Sets a uniform border of the specified thickness and color.
    *
-   * @param thickness Uniform thickness in pixels for all sides.
+   * @param thickness   Uniform thickness in pixels for all sides.
    * @param borderColor ARGB hex color code for the border.
    * @return This container instance for method chaining.
    */
   public ParentComponent border(int thickness, int borderColor) {
-    return border(Border.all(thickness), borderColor);
+    return border(Border.all(thickness), BorderColor.all(borderColor));
+  }
+
+  /**
+   * Sets a standard 1px border with the specified side colors.
+   *
+   * @param borderColor {@link BorderColor} structure containing ARGB colors per side.
+   * @return This container instance for method chaining.
+   */
+  public ParentComponent border(BorderColor borderColor) {
+    return border(Border.DEFAULT, borderColor);
   }
 
   /**
@@ -122,7 +138,7 @@ public abstract class ParentComponent extends AbstractComponent {
    * @return This container instance for method chaining.
    */
   public ParentComponent border(int borderColor) {
-    return border(Border.DEFAULT, borderColor);
+    return border(Border.DEFAULT, BorderColor.all(borderColor));
   }
 
   /**
@@ -135,11 +151,11 @@ public abstract class ParentComponent extends AbstractComponent {
   }
 
   /**
-   * Gets the active border ARGB color.
+   * Gets the active multi-colored border structure.
    *
-   * @return ARGB color code.
+   * @return Active {@link BorderColor}.
    */
-  public int getBorderColor() {
+  public BorderColor getBorderColor() {
     return this.borderColor;
   }
 
@@ -329,14 +345,14 @@ public abstract class ParentComponent extends AbstractComponent {
   /**
    * Renders container background color, texture image, and overlay borders using EverGraphics.
    *
-   * @param graphics Custom graphic context.
-   * @param mouseX Current mouse cursor X.
-   * @param mouseY Current mouse cursor Y.
+   * @param graphics     Custom graphic context.
+   * @param mouseX       Current mouse cursor X.
+   * @param mouseY       Current mouse cursor Y.
    * @param partialTicks Render partial tick delta.
    */
   protected void renderBackground(EverGraphics graphics, int mouseX, int mouseY,
       float partialTicks) {
-    boolean hasBorder = (this.borderColor >> 24 & 0xFF) > 0 && this.border != Border.NONE;
+    boolean hasBorder = this.borderColor != null && this.border != Border.NONE;
 
     // 1. Render solid color background
     if ((this.backgroundColor >> 24 & 0xFF) > 0) {

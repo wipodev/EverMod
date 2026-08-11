@@ -1,11 +1,15 @@
 package net.evermod.client.gui;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
 /**
  * Base contract for all user interface elements in EverUI.
  * Defines dimensions, state flags, rendering methods, and input event handlers.
  *
  * @author Wipodev
  */
+@OnlyIn(Dist.CLIENT)
 public interface UIComponent {
 
   // --- POSITION AND DIMENSIONS ---
@@ -96,19 +100,6 @@ public interface UIComponent {
    */
   void setEnabled(boolean enabled);
 
-  /**
-   * Checks if the mouse coordinates hover inside the bounds of this component.
-   *
-   * @param mouseX Cursor X position.
-   * @param mouseY Cursor Y position.
-   * @return True if mouse is hovering over the component bounds.
-   */
-  default boolean isMouseOver(double mouseX, double mouseY) {
-    return isVisible() &&
-        mouseX >= getX() && mouseX < getX() + getWidth() &&
-        mouseY >= getY() && mouseY < getY() + getHeight();
-  }
-
   // --- RENDERING CYCLE ---
 
   /**
@@ -122,6 +113,8 @@ public interface UIComponent {
   void render(EverGraphics graphics, int mouseX, int mouseY, float partialTicks);
 
   // --- MOUSE INPUT EVENTS ---
+
+  default void mouseMoved(double p_94758_, double p_94759_) {}
 
   /**
    * Handles mouse button press events.
@@ -188,6 +181,10 @@ public interface UIComponent {
     return false;
   }
 
+  default boolean keyReleased(int p_94750_, int p_94751_, int p_94752_) {
+    return false;
+  }
+
   /**
    * Handles typed character input (useful for text fields).
    *
@@ -197,5 +194,22 @@ public interface UIComponent {
    */
   default boolean charTyped(char codePoint, int modifiers) {
     return false;
+  }
+
+  default boolean changeFocus(boolean p_94756_) {
+    return false;
+  }
+
+  /**
+   * Checks if the mouse coordinates hover inside the bounds of this component.
+   *
+   * @param mouseX Cursor X position.
+   * @param mouseY Cursor Y position.
+   * @return True if mouse is hovering over the component bounds.
+   */
+  default boolean isMouseOver(double mouseX, double mouseY) {
+    return isVisible() &&
+        mouseX >= getX() && mouseX < getX() + getWidth() &&
+        mouseY >= getY() && mouseY < getY() + getHeight();
   }
 }

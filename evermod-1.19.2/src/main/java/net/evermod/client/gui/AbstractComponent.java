@@ -8,22 +8,11 @@ package net.evermod.client.gui;
  */
 public abstract class AbstractComponent implements UIComponent {
 
-  /** The X-coordinate position of the component on screen. */
   protected int x;
-
-  /** The Y-coordinate position of the component on screen. */
   protected int y;
-
-  /** The width of the component in pixels. */
   protected int width;
-
-  /** The height of the component in pixels. */
   protected int height;
-
-  /** Controls whether the component should be rendered and process inputs. */
   protected boolean visible = true;
-
-  /** Controls whether the component is interactable by user input. */
   protected boolean enabled = true;
 
   /**

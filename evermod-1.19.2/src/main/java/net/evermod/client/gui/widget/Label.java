@@ -15,22 +15,11 @@ import net.minecraft.network.chat.Component;
  */
 public class Label extends AbstractComponent {
 
-  /** Plain text representation. Null if rich Component is provided. */
   private String text;
-
-  /** Rich formatted Minecraft component text. Null if plain text is provided. */
   private Component component;
-
-  /** Text ARGB color code. Defaults to solid white (0xFFFFFFFF). */
   private int color = 0xFFFFFFFF;
-
-  /** Flag determining whether a drop shadow should be rendered behind the text. */
   private boolean shadow = true;
-
-  /** Text alignment relative to the component bounds. Defaults to START. */
   private LayoutAlignment alignment = LayoutAlignment.START;
-
-  // --- CONSTRUCTORS ---
 
   /**
    * Constructs a Label displaying a formatted Minecraft Component text.
