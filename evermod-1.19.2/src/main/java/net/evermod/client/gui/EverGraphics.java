@@ -1,7 +1,13 @@
 package net.evermod.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -170,43 +176,156 @@ public class EverGraphics extends GuiComponent {
   }
 
   /**
-   * Draws an unfilled rectangle border.
+   * Draws an unfilled border with diagonal mitred corners using a uniform color.
    *
    * @param x      Start X position.
    * @param y      Start Y position.
-   * @param width  Border width.
-   * @param height Border height.
-   * @param color  ARGB border color.
+   * @param width  Total component width.
+   * @param height Total component height.
+   * @param border Border thickness configuration.
+   * @param color  Uniform ARGB border color.
    */
   public void drawOutlineRect(int x, int y, int width, int height, Border border, int color) {
-    if (border.top() > 0) {
-      drawRect(x, y, x + width, y + border.top(), color);
-    }
-    if (border.bottom() > 0) {
-      drawRect(x, y + height - border.bottom(), x + width, y + height, color);
-    }
-    if (border.left() > 0) {
-      drawRect(x, y, x + border.left(), y + height, color);
-    }
-    if (border.right() > 0) {
-      drawRect(x + width - border.right(), y, x + width, y + height, color);
-    }
+    drawOutlineRect(x, y, width, height, border, BorderColor.all(color));
   }
 
   /**
-   * Draws a filled rectangle with a custom border outline in a single operation.
-   * Respects current border thickness configurations.
+   * Draws an unfilled border with diagonal mitred corners allowing unique colors per side via BorderColor.
    *
-   * @param x Horizontal start position.
-   * @param y Vertical start position.
-   * @param width Outer width.
-   * @param height Outer height.
+   * @param x           Start X position.
+   * @param y           Start Y position.
+   * @param width       Total component width.
+   * @param height      Total component height.
+   * @param border      Border thickness configuration.
+   * @param borderColor Colors configuration for each border side.
+   */
+  public void drawOutlineRect(int x, int y, int width, int height, Border border,
+      BorderColor borderColor) {
+    if (borderColor == null) {
+      return;
+    }
+    drawOutlineRectMultiColor(x, y, width, height, border,
+        borderColor.top(), borderColor.right(), borderColor.bottom(), borderColor.left());
+  }
+
+  /**
+   * Draws an unfilled border with diagonal mitred corners allowing unique colors per side.
+   * Based on Minecraft's innerFill winding order to guarantee back-face culling safety.
+   *
+   * @param x           Start X position.
+   * @param y           Start Y position.
+   * @param width       Total component width.
+   * @param height      Total component height.
+   * @param border      Border thickness configuration.
+   * @param topColor    ARGB color for top edge.
+   * @param rightColor  ARGB color for right edge.
+   * @param bottomColor ARGB color for bottom edge.
+   * @param leftColor   ARGB color for left edge.
+   */
+  public void drawOutlineRectMultiColor(int x, int y, int width, int height, Border border,
+      int topColor, int rightColor, int bottomColor, int leftColor) {
+    if (border == null) {
+      return;
+    }
+
+    int top = border.top();
+    int bottom = border.bottom();
+    int left = border.left();
+    int right = border.right();
+
+    int x2 = x + width;
+    int y2 = y + height;
+
+    RenderSystem.enableBlend();
+    RenderSystem.disableTexture();
+    RenderSystem.defaultBlendFunc();
+    RenderSystem.setShader(GameRenderer::getPositionColorShader);
+
+    Matrix4f matrix = getPoseStack().last().pose();
+    BufferBuilder builder = Tesselator.getInstance().getBuilder();
+    builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+
+    // 1. Top Border
+    if (top > 0) {
+      fillTrapezoid(builder, matrix,
+          x, y, // Top-Left outer
+          x2, y, // Top-Right outer
+          x2 - right, y + top, // Top-Right inner
+          x + left, y + top, // Top-Left inner
+          topColor);
+    }
+
+    // 2. Bottom Border
+    if (bottom > 0) {
+      fillTrapezoid(builder, matrix,
+          x + left, y2 - bottom, // Bottom-Left inner
+          x2 - right, y2 - bottom, // Bottom-Right inner
+          x2, y2, // Bottom-Right outer
+          x, y2, // Bottom-Left outer
+          bottomColor);
+    }
+
+    // 3. Left Border
+    if (left > 0) {
+      fillTrapezoid(builder, matrix,
+          x, y, // Top-Left outer
+          x + left, y + top, // Top-Left inner
+          x + left, y2 - bottom, // Bottom-Left inner
+          x, y2, // Bottom-Left outer
+          leftColor);
+    }
+
+    // 4. Right Border
+    if (right > 0) {
+      fillTrapezoid(builder, matrix,
+          x2 - right, y + top, // Top-Right inner
+          x2, y, // Top-Right outer
+          x2, y2, // Bottom-Right outer
+          x2 - right, y2 - bottom// Bottom-Right inner
+          , rightColor);
+    }
+
+    BufferUploader.drawWithShader(builder.end());
+    RenderSystem.enableTexture();
+    RenderSystem.disableBlend();
+  }
+
+  /**
+   * Helper method to submit trapezoid vertices following Minecraft innerFill winding order:
+   * (Point 4) -> (Point 3) -> (Point 2) -> (Point 1)
+   */
+  private static void fillTrapezoid(BufferBuilder builder, Matrix4f matrix,
+      float x1, float y1, float x2, float y2,
+      float x3, float y3, float x4, float y4,
+      int color) {
+    float a = (float) (color >> 24 & 255) / 255.0F;
+    float r = (float) (color >> 16 & 255) / 255.0F;
+    float g = (float) (color >> 8 & 255) / 255.0F;
+    float b = (float) (color & 255) / 255.0F;
+
+    builder.vertex(matrix, x4, y4, 0.0F).color(r, g, b, a).endVertex();
+    builder.vertex(matrix, x3, y3, 0.0F).color(r, g, b, a).endVertex();
+    builder.vertex(matrix, x2, y2, 0.0F).color(r, g, b, a).endVertex();
+    builder.vertex(matrix, x1, y1, 0.0F).color(r, g, b, a).endVertex();
+  }
+
+  /**
+   * Draws a filled rectangle with a custom multicolor border outline using BorderColor.
+   *
+   * @param x               Horizontal start position.
+   * @param y               Vertical start position.
+   * @param width           Outer width.
+   * @param height          Outer height.
    * @param backgroundColor Inner background ARGB color.
-   * @param borderColor Outer border ARGB color.
+   * @param border          Border thickness configuration.
+   * @param borderColor     Border colors configuration.
    */
   public void drawBorderedRect(int x, int y, int width, int height, int backgroundColor,
-      Border border, int borderColor) {
-    // 1. Draw inner background taking border offsets into account
+      Border border, BorderColor borderColor) {
+    if (border == null) {
+      return;
+    }
+
     drawRect(
         x + border.left(),
         y + border.top(),
@@ -214,23 +333,60 @@ public class EverGraphics extends GuiComponent {
         y + height - border.bottom(),
         backgroundColor);
 
-    // 2. Draw outer border frame
     drawOutlineRect(x, y, width, height, border, borderColor);
+  }
+
+  /**
+   * Draws a filled rectangle with a custom multicolor border outline using individual side colors.
+   *
+   * @param x               Horizontal start position.
+   * @param y               Vertical start position.
+   * @param width           Outer width.
+   * @param height          Outer height.
+   * @param backgroundColor Inner background ARGB color.
+   * @param border          Border thickness configuration.
+   * @param topColor        ARGB color for top edge.
+   * @param rightColor      ARGB color for right edge.
+   * @param bottomColor     ARGB color for bottom edge.
+   * @param leftColor       ARGB color for left edge.
+   */
+  public void drawBorderedRectMultiColor(int x, int y, int width, int height, int backgroundColor,
+      Border border, int topColor, int rightColor, int bottomColor, int leftColor) {
+    drawBorderedRect(x, y, width, height, backgroundColor, border,
+        new BorderColor(topColor, rightColor, bottomColor, leftColor));
+  }
+
+  /**
+   * Draws a filled rectangle with a custom border outline in a single operation.
+   * Respects current border thickness configurations.
+   *
+   * @param x               Horizontal start position.
+   * @param y               Vertical start position.
+   * @param width           Outer width.
+   * @param height          Outer height.
+   * @param backgroundColor Inner background ARGB color.
+   * @param border          Border thickness configuration.
+   * @param borderColor     Outer border ARGB color.
+   */
+  public void drawBorderedRect(int x, int y, int width, int height, int backgroundColor,
+      Border border, int borderColor) {
+    drawBorderedRect(x, y, width, height, backgroundColor, border, BorderColor.all(borderColor));
   }
 
   /**
    * Draws a filled box with a default 1px border outline.
    *
-   * @param x Horizontal start position.
-   * @param y Vertical start position.
-   * @param width Outer width.
-   * @param height Outer height.
+   * @param x               Horizontal start position.
+   * @param y               Vertical start position.
+   * @param width           Outer width.
+   * @param height          Outer height.
    * @param backgroundColor Inner background ARGB color.
-   * @param borderColor Outer border ARGB color.
+   * @param borderColor     Outer border ARGB color.
    */
   public void drawBorderedRect(int x, int y, int width, int height, int backgroundColor,
       int borderColor) {
-    drawBorderedRect(x, y, width, height, backgroundColor, Border.DEFAULT, borderColor);
+    drawBorderedRect(x, y, width, height, backgroundColor, Border.DEFAULT,
+        BorderColor.all(borderColor));
   }
 
   // --- TEXTURE RENDER METHODS ---
@@ -266,11 +422,147 @@ public class EverGraphics extends GuiComponent {
   }
 
   /**
-   * Draws a tinted texture quad with custom RGBA values (e.g., overlay vignettes or colored buttons).
+  * Draws a full, tinted texture quad using the complete texture dimensions.
+  *
+  * @param texture       The {@link ResourceLocation} of the texture to render.
+  * @param x             The screen X coordinate where the quad will be drawn.
+  * @param y             The screen Y coordinate where the quad will be drawn.
+  * @param width         The width of the quad on the screen.
+  * @param height        The height of the quad on the screen.
+  * @param red           Red tint factor ranging from 0.0F to 1.0F.
+  * @param green         Green tint factor ranging from 0.0F to 1.0F.
+  * @param blue          Blue tint factor ranging from 0.0F to 1.0F.
+  * @param alpha         Alpha (transparency) factor ranging from 0.0F to 1.0F.
+  * @param textureWidth  Total width of the texture sheet in pixels.
+  * @param textureHeight Total height of the texture sheet in pixels.
+  */
+  public void drawTexture(ResourceLocation texture, int x, int y, int width, int height, float red,
+      float green, float blue, float alpha, int textureWidth, int textureHeight) {
+    this.drawTexture(texture, x, y, width, height, 0.0F, 0.0F, textureWidth, textureHeight,
+        textureWidth, textureHeight, red, green, blue, alpha);
+  }
+
+  /**
+  * Draws a textured, tinted quad on the screen using specific UV texture coordinates.
+  * <p>
+  * This method supports partial texture rendering (spritesheets) by defining an offset and crop size
+  * within the texture sheet, along with custom RGBA color modulation.
+  * </p>
+  *
+  * @param texture       The {@link ResourceLocation} of the texture to render.
+  * @param x             The screen X coordinate where the quad will be drawn.
+  * @param y             The screen Y coordinate where the quad will be drawn.
+  * @param width         The width of the quad on the screen.
+  * @param height        The height of the quad on the screen.
+  * @param uOffset       Horizontal texture coordinate origin (U offset) in pixels.
+  * @param vOffset       Vertical texture coordinate origin (V offset) in pixels.
+  * @param uWidth        Width of the cropped region from the texture in pixels.
+  * @param vHeight       Height of the cropped region from the texture in pixels.
+  * @param textureWidth  Total width of the texture sheet in pixels.
+  * @param textureHeight Total height of the texture sheet in pixels.
+  * @param red           Red tint factor ranging from 0.0F to 1.0F.
+  * @param green         Green tint factor ranging from 0.0F to 1.0F.
+  * @param blue          Blue tint factor ranging from 0.0F to 1.0F.
+  * @param alpha         Alpha (transparency) factor ranging from 0.0F to 1.0F.
+  */
+  public void drawTexture(ResourceLocation texture, int x, int y, int width, int height,
+      float uOffset, float vOffset, int uWidth, int vHeight, int textureWidth, int textureHeight,
+      float red, float green, float blue, float alpha) {
+    this.enableBlend();
+    RenderSystem.enableDepthTest();
+    RenderSystem.setShader(GameRenderer::getPositionTexShader);
+    RenderSystem.setShaderTexture(0, texture);
+    this.setColor(red, green, blue, alpha);
+
+    blit(getPoseStack(), x, y, width, height, uOffset, vOffset, uWidth, vHeight,
+        textureWidth, textureHeight);
+
+    this.resetColor();
+    this.disableBlend();
+  }
+
+  /**
+   * Draws a texture cropped by border margins with a solid outer border frame overlayed on top
+   * using individual side colors.
    *
    * @param texture       Texture resource location.
-   * @param x             Screen target X position.
-   * @param y             Screen target Y position.
+   * @param x             Destination X position.
+   * @param y             Destination Y position.
+   * @param width         Render width on screen.
+   * @param height        Render height on screen.
+   * @param uOffset       Horizontal texture coordinate origin (U offset) in pixels.
+   * @param vOffset       Vertical texture coordinate origin (V offset) in pixels.
+   * @param uWidth        Width of the cropped region from the texture in pixels.
+   * @param vHeight       Height of the cropped region from the texture in pixels.
+   * @param textureWidth  Original texture sheet width.
+   * @param textureHeight Original texture sheet height.
+   * @param border        Border thickness configuration.
+   * @param borderColor   Colors configuration for each border side.
+   * @param red           Red tint factor [0.0F - 1.0F].
+   * @param green         Green tint factor [0.0F - 1.0F].
+   * @param blue          Blue tint factor [0.0F - 1.0F].
+   * @param alpha         Alpha factor [0.0F - 1.0F].
+   */
+  public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
+      float uOffset, float vOffset, int uWidth, int vHeight,
+      int textureWidth, int textureHeight, Border border, BorderColor borderColor,
+      float red, float green, float blue, float alpha) {
+
+    if (border == null) {
+      return;
+    }
+
+    int contentX = x + border.left();
+    int contentY = y + border.top();
+    int contentWidth = width - border.left() - border.right();
+    int contentHeight = height - border.top() - border.bottom();
+
+    // Render texture using UV coordinates
+    drawTexture(texture, contentX, contentY, contentWidth, contentHeight,
+        uOffset, vOffset, uWidth, vHeight, textureWidth, textureHeight,
+        red, green, blue, alpha);
+
+    // Render outer border frame on top
+    drawOutlineRect(x, y, width, height, border, borderColor);
+  }
+
+  /**
+   * Draws a texture cropped by border margins with a solid outer border frame overlayed on top
+   * using a uniform border color.
+   *
+   * @param texture       Texture resource location.
+   * @param x             Destination X position.
+   * @param y             Destination Y position.
+   * @param width         Render width on screen.
+   * @param height        Render height on screen.
+   * @param uOffset       Horizontal texture coordinate origin (U offset) in pixels.
+   * @param vOffset       Vertical texture coordinate origin (V offset) in pixels.
+   * @param uWidth        Width of the cropped region from the texture in pixels.
+   * @param vHeight       Height of the cropped region from the texture in pixels.
+   * @param textureWidth  Original texture sheet width.
+   * @param textureHeight Original texture sheet height.
+   * @param border        Border thickness configuration.
+   * @param borderColor   Uniform ARGB color code for the overlay border.
+   * @param red           Red tint factor [0.0F - 1.0F].
+   * @param green         Green tint factor [0.0F - 1.0F].
+   * @param blue          Blue tint factor [0.0F - 1.0F].
+   * @param alpha         Alpha factor [0.0F - 1.0F].
+   */
+  public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
+      float uOffset, float vOffset, int uWidth, int vHeight,
+      int textureWidth, int textureHeight, Border border, int borderColor,
+      float red, float green, float blue, float alpha) {
+    drawBorderTexture(texture, x, y, width, height, uOffset, vOffset, uWidth, vHeight,
+        textureWidth, textureHeight, border, BorderColor.all(borderColor), red, green, blue, alpha);
+  }
+
+  /**
+   * Draws a full texture inset by border margins with a solid outer border frame overlayed on top
+   * using individual side colors.
+   *
+   * @param texture       Texture resource location.
+   * @param x             Destination X position.
+   * @param y             Destination Y position.
    * @param width         Render width on screen.
    * @param height        Render height on screen.
    * @param red           Red tint factor [0.0F - 1.0F].
@@ -279,101 +571,143 @@ public class EverGraphics extends GuiComponent {
    * @param alpha         Alpha factor [0.0F - 1.0F].
    * @param textureWidth  Original texture sheet width.
    * @param textureHeight Original texture sheet height.
+   * @param border        Border thickness configuration.
+   * @param borderColor   Colors configuration for each border side.
    */
-  public void drawTexture(ResourceLocation texture, int x, int y, int width, int height, float red,
-      float green, float blue, float alpha, int textureWidth, int textureHeight) {
-    this.enableBlend();
-    RenderSystem.setShader(GameRenderer::getPositionTexShader);
-    RenderSystem.setShaderTexture(0, texture);
-    this.setColor(red, green, blue, alpha);
-
-    blit(getPoseStack(), x, y, width, height, 0.0F, 0.0F, textureWidth, textureHeight, textureWidth,
-        textureHeight);
-
-    this.resetColor();
-    this.disableBlend();
-  }
-
-  /**
-  * Draws a texture inset by border margins with a solid outer border frame overlayed on top.
-  *
-  * @param texture Texture resource location.
-  * @param x Destination X position.
-  * @param y Destination Y position.
-  * @param width Render width on screen.
-  * @param height Render height on screen.
-  * @param red Red tint factor [0.0F - 1.0F].
-  * @param green Green tint factor [0.0F - 1.0F].
-  * @param blue Blue tint factor [0.0F - 1.0F].
-  * @param alpha Alpha factor [0.0F - 1.0F].
-  * @param textureWidth Original texture sheet width.
-  * @param textureHeight Original texture sheet height.
-  * @param border Border thickness configuration.
-  * @param borderColor ARGB color code for the overlay border.
-  */
   public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
-      float red, float green, float blue, float alpha, int textureWidth, int textureHeight,
-      Border border, int borderColor) {
-
-    int contentWidth = width - border.left() - border.right();
-    int contentHeight = height - border.top() - border.bottom();
-
-    drawTexture(texture, x + border.left(), y + border.top(), contentWidth, contentHeight,
-        red, green, blue, alpha, textureWidth, textureHeight);
-
-    drawOutlineRect(x, y, width, height, border, borderColor);
+      float red, float green, float blue, float alpha,
+      int textureWidth, int textureHeight, Border border, BorderColor borderColor) {
+    drawBorderTexture(texture, x, y, width, height, 0.0F, 0.0F, textureWidth, textureHeight,
+        textureWidth, textureHeight, border, borderColor, red, green, blue, alpha);
   }
 
   /**
-   * Draws a texture inset by custom border margins with an un-tinted overlay frame.
+   * Draws a full texture inset by border margins with a solid outer border frame overlayed on top
+   * using a uniform border color.
    *
-   * @param texture Target texture resource location.
-   * @param x Horizontal destination X coordinate.
-   * @param y Vertical destination Y coordinate.
-   * @param width Total outer width on screen.
-   * @param height Total outer height on screen.
-   * @param textureWidth Source texture file width.
-   * @param textureHeight Source texture file height.
-   * @param border Custom border thickness structure for margin offsets.
-   * @param borderColor ARGB color code for the border outline.
+   * @param texture       Texture resource location.
+   * @param x             Destination X position.
+   * @param y             Destination Y position.
+   * @param width         Render width on screen.
+   * @param height        Render height on screen.
+   * @param red           Red tint factor [0.0F - 1.0F].
+   * @param green         Green tint factor [0.0F - 1.0F].
+   * @param blue          Blue tint factor [0.0F - 1.0F].
+   * @param alpha         Alpha factor [0.0F - 1.0F].
+   * @param textureWidth  Original texture sheet width.
+   * @param textureHeight Original texture sheet height.
+   * @param border        Border thickness configuration.
+   * @param borderColor   Uniform ARGB color code for the overlay border.
    */
   public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
+      float red, float green, float blue, float alpha,
       int textureWidth, int textureHeight, Border border, int borderColor) {
+    drawBorderTexture(texture, x, y, width, height, red, green, blue, alpha,
+        textureWidth, textureHeight, border, BorderColor.all(borderColor));
+  }
+
+  /**
+   * Draws a texture inset by custom border margins with an un-tinted overlay frame using individual side colors.
+   *
+   * @param texture       Target texture resource location.
+   * @param x             Horizontal destination X coordinate.
+   * @param y             Vertical destination Y coordinate.
+   * @param width         Total outer width on screen.
+   * @param height        Total outer height on screen.
+   * @param textureWidth  Source texture file width.
+   * @param textureHeight Source texture file height.
+   * @param border        Custom border thickness structure for margin offsets.
+   * @param borderColor   Colors configuration for each border side.
+   */
+  public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
+      int textureWidth, int textureHeight, Border border, BorderColor borderColor) {
     drawBorderTexture(texture, x, y, width, height, 1.0F, 1.0F, 1.0F,
         1.0F, textureWidth, textureHeight, border, borderColor);
   }
 
   /**
-   * Draws a texture inset using default 1px border margins with custom sheet dimensions.
+   * Draws a texture inset by custom border margins with an un-tinted overlay frame using a uniform border color.
    *
-   * @param texture Target texture resource location.
-   * @param x Horizontal destination X coordinate.
-   * @param y Vertical destination Y coordinate.
-   * @param width Total outer width on screen.
-   * @param height Total outer height on screen.
-   * @param textureWidth Source texture file width.
+   * @param texture       Target texture resource location.
+   * @param x             Horizontal destination X coordinate.
+   * @param y             Vertical destination Y coordinate.
+   * @param width         Total outer width on screen.
+   * @param height        Total outer height on screen.
+   * @param textureWidth  Source texture file width.
    * @param textureHeight Source texture file height.
-   * @param borderColor ARGB color code for the border outline.
+   * @param border        Custom border thickness structure for margin offsets.
+   * @param borderColor   Uniform ARGB color code for the border outline.
    */
   public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
-      int textureWidth, int textureHeight, int borderColor) {
+      int textureWidth, int textureHeight, Border border, int borderColor) {
+    drawBorderTexture(texture, x, y, width, height, textureWidth, textureHeight, border,
+        BorderColor.all(borderColor));
+  }
+
+  /**
+   * Draws a texture inset using default 1px border margins with custom sheet dimensions using individual side colors.
+   *
+   * @param texture       Target texture resource location.
+   * @param x             Horizontal destination X coordinate.
+   * @param y             Vertical destination Y coordinate.
+   * @param width         Total outer width on screen.
+   * @param height        Total outer height on screen.
+   * @param textureWidth  Source texture file width.
+   * @param textureHeight Source texture file height.
+   * @param borderColor   Colors configuration for each border side.
+   */
+  public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
+      int textureWidth, int textureHeight, BorderColor borderColor) {
     drawBorderTexture(texture, x, y, width, height, textureWidth, textureHeight, Border.DEFAULT,
         borderColor);
   }
 
   /**
-   * Draws a texture inset using default 1px border margins assuming a 256x256 texture sheet.
+   * Draws a texture inset using default 1px border margins with custom sheet dimensions using a uniform border color.
    *
-   * @param texture Target texture resource location.
-   * @param x Horizontal destination X coordinate.
-   * @param y Vertical destination Y coordinate.
-   * @param width Total outer width on screen.
-   * @param height Total outer height on screen.
-   * @param borderColor ARGB color code for the border outline.
+   * @param texture       Target texture resource location.
+   * @param x             Horizontal destination X coordinate.
+   * @param y             Vertical destination Y coordinate.
+   * @param width         Total outer width on screen.
+   * @param height        Total outer height on screen.
+   * @param textureWidth  Source texture file width.
+   * @param textureHeight Source texture file height.
+   * @param borderColor   Uniform ARGB color code for the border outline.
+   */
+  public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
+      int textureWidth, int textureHeight, int borderColor) {
+    drawBorderTexture(texture, x, y, width, height, textureWidth, textureHeight, Border.DEFAULT,
+        BorderColor.all(borderColor));
+  }
+
+  /**
+   * Draws a texture inset using default 1px border margins assuming a 256x256 texture sheet using individual side colors.
+   *
+   * @param texture     Target texture resource location.
+   * @param x           Horizontal destination X coordinate.
+   * @param y           Vertical destination Y coordinate.
+   * @param width       Total outer width on screen.
+   * @param height      Total outer height on screen.
+   * @param borderColor Colors configuration for each border side.
+   */
+  public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
+      BorderColor borderColor) {
+    drawBorderTexture(texture, x, y, width, height, 256, 256, borderColor);
+  }
+
+  /**
+   * Draws a texture inset using default 1px border margins assuming a 256x256 texture sheet using a uniform border color.
+   *
+   * @param texture     Target texture resource location.
+   * @param x           Horizontal destination X coordinate.
+   * @param y           Vertical destination Y coordinate.
+   * @param width       Total outer width on screen.
+   * @param height      Total outer height on screen.
+   * @param borderColor Uniform ARGB color code for the border outline.
    */
   public void drawBorderTexture(ResourceLocation texture, int x, int y, int width, int height,
       int borderColor) {
-    drawBorderTexture(texture, x, y, width, height, 256, 256, borderColor);
+    drawBorderTexture(texture, x, y, width, height, 256, 256, BorderColor.all(borderColor));
   }
 
   // --- TEXT RENDERING METHODS ---
