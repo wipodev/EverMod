@@ -10,6 +10,8 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.wipodev.devevermod.client.gui.screens.BloodSkyEffectHandler;
+
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -23,6 +25,14 @@ public class ClientInputHandler {
       KeyConflictContext.IN_GAME,
       InputConstants.Type.KEYSYM,
       GLFW.GLFW_KEY_K,
+      "key.categories.evermod");
+
+  /** Key mapping for toggling the Blood Sky test effect */
+  public static final KeyMapping BLOOD_SKY_KEY_MAPPING = new KeyMapping(
+      "key.evermod.toggle_blood_sky",
+      KeyConflictContext.IN_GAME,
+      InputConstants.Type.KEYSYM,
+      GLFW.GLFW_KEY_J,
       "key.categories.evermod");
 
   /**
@@ -45,6 +55,7 @@ public class ClientInputHandler {
    */
   private static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
     event.register(DEMO_KEY_MAPPING);
+    event.register(BLOOD_SKY_KEY_MAPPING);
   }
 
   /**
@@ -59,22 +70,26 @@ public class ClientInputHandler {
      */
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-      // Check only during the END phase to avoid processing twice per tick
       if (event.phase != TickEvent.Phase.END) {
         return;
       }
 
       Minecraft mc = Minecraft.getInstance();
 
-      // Ensure player and world exist before opening GUI
       if (mc.player == null || mc.level == null) {
         return;
       }
 
-      // Consume all pending key presses
       while (DEMO_KEY_MAPPING.consumeClick()) {
-        // Open the demo screen
         mc.setScreen(new EverScreenDemo());
+      }
+
+      while (BLOOD_SKY_KEY_MAPPING.consumeClick()) {
+        if (BloodSkyEffectHandler.isActive()) {
+          BloodSkyEffectHandler.disable();
+        } else {
+          BloodSkyEffectHandler.enable(1.0f);
+        }
       }
     }
   }
