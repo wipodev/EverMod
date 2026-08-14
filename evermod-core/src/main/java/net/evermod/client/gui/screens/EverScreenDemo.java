@@ -9,6 +9,7 @@ import net.evermod.client.gui.layout.Row;
 import net.evermod.client.gui.layout.Space;
 import net.evermod.client.gui.widget.SolidButton;
 import net.evermod.client.gui.widget.Button;
+import net.evermod.client.gui.widget.Checkbox;
 import net.evermod.client.gui.widget.InputText;
 import net.evermod.client.gui.widget.Label;
 import net.evermod.client.gui.widget.Slider;
@@ -26,6 +27,7 @@ public class EverScreenDemo extends EverScreen {
 
   private String name = "";
   private double sliderValue = 30.0D;
+  private boolean enableNotifications = true;
   ResourceLocation btnBase = EverLocation.parse(EverMod.EVER_ID, "textures/gui/button.png");
   ResourceLocation btnDisabled =
       EverLocation.parse(EverMod.EVER_ID, "textures/gui/button_disabled.png");
@@ -116,6 +118,17 @@ public class EverScreenDemo extends EverScreen {
     sliderContainer.addChild(demoSlider);
     sliderContainer.addChild(sliderValueLabel);
     leftColumn.addChild(sliderContainer);
+    leftColumn.addChild(Space.height(4));
+
+    // --- CHECKBOX INTEGRATION ---
+    Checkbox demoCheckbox =
+        new Checkbox(0, 0, 120, 20, "Habilitar avisos", this.enableNotifications)
+            .onChange(checked -> {
+              this.enableNotifications = checked;
+              System.out.println("Estado de notificaciones: " + checked);
+            });
+
+    leftColumn.addChild(demoCheckbox);
 
     // 5. Right Column inside Row
     Column rightColumn = new Column()
