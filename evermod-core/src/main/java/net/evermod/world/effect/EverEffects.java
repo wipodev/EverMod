@@ -9,8 +9,19 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 
+/**
+ * Utility class for spawning visual and auditory world effects on the server side.
+ */
 public class EverEffects {
 
+  /**
+   * Spawns repeated item eating particles and sound effects at the mouth position of a mob.
+   *
+   * @param entity The mob performing the eating action.
+   * @param level The server level where particles and sounds are spawned.
+   * @param eatingItem The item stack being consumed to generate item particles.
+   * @param repeat The total duration limit in ticks for the eating effect loop.
+   */
   public static void playEating(Mob entity, ServerLevel level, ItemStack eatingItem, int repeat) {
     if (entity == null || !entity.isAlive() || eatingItem.isEmpty()) {
       return;
