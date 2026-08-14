@@ -17,6 +17,8 @@ import net.minecraftforge.eventbus.api.IEventBus;
  * @author Wipodev
  */
 public class EverMod {
+
+  public static final String EVER_ID = "evermod";
   public static final String AUTHOR = "Wipodev";
   public static final String FRAMEWORK_NAME = "EverMod Framework";
   public static final String VERSION = "2.0.0";
@@ -26,7 +28,8 @@ public class EverMod {
   * Private constructor to prevent direct instantiation of utility class.
   */
   private EverMod() {
-    throw new UnsupportedOperationException("EverMod is an initialization utility class and cannot be instantiated.");
+    throw new UnsupportedOperationException(
+        "EverMod is an initialization utility class and cannot be instantiated.");
   }
 
   /**
@@ -40,7 +43,8 @@ public class EverMod {
       throw new IllegalArgumentException("The Mod ID cannot be null or empty.");
     }
 
-    LOGGER.info("Initializing {} v{} by {} for target mod: {}", FRAMEWORK_NAME, VERSION, AUTHOR, modid);
+    LOGGER.info("Initializing {} v{} by {} for target mod: {}", FRAMEWORK_NAME, VERSION, AUTHOR,
+        modid);
     ChannelManager.autoRegister(modid);
     ConfigManager.init(modid, modEventBus);
   }
