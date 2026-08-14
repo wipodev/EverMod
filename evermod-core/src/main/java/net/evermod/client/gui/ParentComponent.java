@@ -15,6 +15,8 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class ParentComponent extends AbstractComponent {
 
   protected final List<UIComponent> children = new ArrayList<>();
+  protected UIComponent focusedChild = null;
+
   protected int backgroundColor = 0x00000000;
   protected ResourceLocation backgroundImage = null;
   protected Border border = Border.NONE;
@@ -236,6 +238,9 @@ public abstract class ParentComponent extends AbstractComponent {
    * @return True if the child was removed.
    */
   public boolean removeChild(UIComponent child) {
+    if (this.focusedChild == child) {
+      this.focusedChild = null;
+    }
     return this.children.remove(child);
   }
 
@@ -244,6 +249,7 @@ public abstract class ParentComponent extends AbstractComponent {
    */
   public void clearChildren() {
     this.children.clear();
+    this.focusedChild = null;
   }
 
   /**
@@ -286,7 +292,8 @@ public abstract class ParentComponent extends AbstractComponent {
    */
   protected void renderBackground(EverGraphics graphics, int mouseX, int mouseY,
       float partialTicks) {
-    boolean hasBorder = this.border != null && this.border != Border.NONE && this.borderColor != null;
+    boolean hasBorder =
+        this.border != null && this.border != Border.NONE && this.borderColor != null;
     boolean hasSolidColor = (this.backgroundColor >> 24 & 0xFF) > 0;
 
     if (hasSolidColor) {
@@ -325,11 +332,40 @@ public abstract class ParentComponent extends AbstractComponent {
 
     ensureInitialized();
 
-    // Iterate backwards so components drawn on top (front) receive clicks first
+    // Iterate backwards so components drawn on top receive clicks first
     for (int i = this.children.size() - 1; i >= 0; i--) {
       UIComponent child = this.children.get(i);
       if (child.mouseClicked(mouseX, mouseY, button)) {
-        return true; // Event consumed by child
+        this.focusedChild = child; // Track active child for subsequent drag events
+        return true;
+      }
+    }
+
+    this.focusedChild = null;
+    return false;
+  }
+
+  @Override
+  public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX,
+      double dragY) {
+    if (!isVisible() || !isEnabled()) {
+      return false;
+    }
+
+    ensureInitialized();
+
+    // Direct drag events directly to active focused child first
+    if (this.focusedChild != null) {
+      if (this.focusedChild.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+        return true;
+      }
+    }
+
+    // Fallback iteration through children in reverse rendering order
+    for (int i = this.children.size() - 1; i >= 0; i--) {
+      UIComponent child = this.children.get(i);
+      if (child.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+        return true;
       }
     }
     return false;
@@ -345,6 +381,18 @@ public abstract class ParentComponent extends AbstractComponent {
     }
 
     ensureInitialized();
+
+    boolean handled = false;
+
+    // Release focused child first
+    if (this.focusedChild != null) {
+      handled = this.focusedChild.mouseReleased(mouseX, mouseY, button);
+      this.focusedChild = null;
+    }
+
+    if (handled) {
+      return true;
+    }
 
     for (int i = this.children.size() - 1; i >= 0; i--) {
       UIComponent child = this.children.get(i);
