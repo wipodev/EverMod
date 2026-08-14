@@ -1,5 +1,6 @@
 package net.evermod.client.event;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.evermod.client.gui.EverGraphics;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
@@ -11,19 +12,25 @@ import net.minecraftforge.eventbus.api.Event;
  * @author Wipodev
  */
 public abstract class EverRenderGuiOverlayEvent extends Event {
+
   private final EverGraphics graphics;
   private final float partialTick;
   private final String overlayId;
   private final int width;
   private final int height;
 
-  protected EverRenderGuiOverlayEvent(Object nativeGraphics, float partialTick, String overlayId,
+  protected EverRenderGuiOverlayEvent(EverGraphics graphics, float partialTick, String overlayId,
       int width, int height) {
-    this.graphics = new EverGraphics(nativeGraphics);
+    this.graphics = graphics;
     this.partialTick = partialTick;
     this.overlayId = overlayId;
     this.width = width;
     this.height = height;
+  }
+
+  protected EverRenderGuiOverlayEvent(PoseStack poseStack, float partialTick, String overlayId,
+      int width, int height) {
+    this(EverGraphics.of(poseStack), partialTick, overlayId, width, height);
   }
 
   /**
@@ -32,35 +39,45 @@ public abstract class EverRenderGuiOverlayEvent extends Event {
    * @return EverGraphics wrapper instance.
    */
   public EverGraphics getGraphics() {
-    return graphics;
+    return this.graphics;
   }
 
   public float getPartialTick() {
-    return partialTick;
+    return this.partialTick;
   }
 
   public String getOverlayId() {
-    return overlayId;
+    return this.overlayId;
   }
 
   public int getWidth() {
-    return width;
+    return this.width;
   }
 
   public int getHeight() {
-    return height;
+    return this.height;
   }
 
   @Cancelable
   public static class Pre extends EverRenderGuiOverlayEvent {
-    public Pre(Object graphics, float partialTick, String overlayId, int width, int height) {
+
+    public Pre(EverGraphics graphics, float partialTick, String overlayId, int width, int height) {
       super(graphics, partialTick, overlayId, width, height);
+    }
+
+    public Pre(PoseStack poseStack, float partialTick, String overlayId, int width, int height) {
+      super(poseStack, partialTick, overlayId, width, height);
     }
   }
 
   public static class Post extends EverRenderGuiOverlayEvent {
-    public Post(Object graphics, float partialTick, String overlayId, int width, int height) {
+
+    public Post(EverGraphics graphics, float partialTick, String overlayId, int width, int height) {
       super(graphics, partialTick, overlayId, width, height);
+    }
+
+    public Post(PoseStack poseStack, float partialTick, String overlayId, int width, int height) {
+      super(poseStack, partialTick, overlayId, width, height);
     }
   }
 }
