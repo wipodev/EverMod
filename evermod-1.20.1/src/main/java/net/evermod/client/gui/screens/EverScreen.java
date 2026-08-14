@@ -1,14 +1,14 @@
 package net.evermod.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.evermod.client.gui.EverGraphics;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 /**
- * Native Minecraft 1.19.2 Screen implementation of IEverScreen.
- * Adapts Mojang's PoseStack rendering pipeline and event listeners to EverUI.
+ * Native Minecraft 1.20+ Screen implementation of IEverScreen.
+ * Adapts Mojang's GuiGraphics rendering pipeline and event listeners to EverUI.
  *
  * @author Wipodev
  */
@@ -56,13 +56,13 @@ public abstract class EverScreen extends Screen implements IEverScreen {
   }
 
   @Override
-  public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-    this.renderBackground(poseStack);
+  public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    this.renderBackground(guiGraphics);
 
-    EverGraphics graphics = EverGraphics.of(poseStack);
+    EverGraphics graphics = EverGraphics.of(guiGraphics.pose());
     this.renderEverScreen(graphics, mouseX, mouseY, partialTick);
 
-    super.render(poseStack, mouseX, mouseY, partialTick);
+    super.render(guiGraphics, mouseX, mouseY, partialTick);
   }
 
   @Override

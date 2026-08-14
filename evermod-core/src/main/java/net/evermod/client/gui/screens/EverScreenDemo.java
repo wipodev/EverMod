@@ -1,14 +1,18 @@
 package net.evermod.client.gui.screens;
 
+import net.evermod.client.gui.BorderColor;
 import net.evermod.client.gui.layout.Box;
 import net.evermod.client.gui.layout.Column;
 import net.evermod.client.gui.layout.LayoutAlignment;
 import net.evermod.client.gui.layout.Row;
 import net.evermod.client.gui.layout.Space;
+import net.evermod.client.gui.widget.SolidButton;
+import net.evermod.client.gui.widget.Button;
+import net.evermod.client.gui.widget.InputText;
 import net.evermod.client.gui.widget.Label;
+import net.evermod.resources.EverLocation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-
 
 /**
  * Diagnostic Screen used to test EverUI rendering, hierarchy, and components.
@@ -16,6 +20,8 @@ import net.minecraft.network.chat.Component;
  * @author Wipodev
  */
 public class EverScreenDemo extends EverScreen {
+
+  private String name = "";
 
   /**
    * Constructs the diagnostic screen.
@@ -25,7 +31,7 @@ public class EverScreenDemo extends EverScreen {
   }
 
   @Override
-  protected void setupUI() {
+  public void setupUI() {
     // 1. Root BOX occupying 80% of screen size, centered horizontally and vertically
     int boxWidth = (int) (this.width * 0.8F);
     int boxHeight = (int) (this.height * 0.8F);
@@ -35,7 +41,13 @@ public class EverScreenDemo extends EverScreen {
     Box mainBox = new Box(boxX, boxY, boxWidth, boxHeight)
         .padding(12)
         .align(LayoutAlignment.CENTER, LayoutAlignment.CENTER);
-    mainBox.backgroundColor(0xD0121218); // Dark gray container background
+    mainBox.backgroundColor(0xD0121218) // Dark gray container background
+        .border(new BorderColor(
+            0xFF007ACC, // Top (Blue)
+            0xFFFF5555, // Right (Red)
+            0xFF55FF55, // Bottom (Green)
+            0xFFFFFF55 // Left (Yellow)
+        ));
 
     // 2. Main vertical layout inside Box
     Column rootColumn = new Column()
@@ -45,7 +57,8 @@ public class EverScreenDemo extends EverScreen {
     // Box Header Label
     Label boxTitle = new Label(
         Component.literal("=== MAIN BOX CONTAINER ===").withStyle(ChatFormatting.GOLD,
-            ChatFormatting.BOLD)).shadow(true);
+            ChatFormatting.BOLD))
+        .shadow(true);
 
     // 3. ROW Container holding two equal Columns side by side
     int availableRowWidth = boxWidth - 24;
@@ -70,6 +83,13 @@ public class EverScreenDemo extends EverScreen {
     leftColumn.addChild(new Label("• Auto-calculated Y pos").color(0xFFFFFFFF));
     leftColumn.addChild(new Label("• Managed by Column flow").color(0xFFAAAAAA));
 
+    InputText nameInput = new InputText()
+        .placeholder("Escribe tu nombre...")
+        .value(this.name)
+        .setOnValueChange(newValue -> this.name = newValue);
+
+    leftColumn.addChild(nameInput);
+
     // 5. Right Column inside Row
     Column rightColumn = new Column()
         .gap(6)
@@ -81,6 +101,32 @@ public class EverScreenDemo extends EverScreen {
     rightColumn.addChild(Space.height(4)); // Vertical spacing
     rightColumn.addChild(new Label("• Automatic horizontal Row gap").color(0xFFFFFFFF));
     rightColumn.addChild(new Label("• No manual setX / setY used").color(0xFF55FF55));
+    rightColumn.addChild(new SolidButton("Boton Color")
+        .backgroundColors(0xFF1E88E5, 0xFF1565C0, 0xFF424242)
+        .border(1)
+        .textColor(0xFFFFFFFF)
+        .alignment(LayoutAlignment.CENTER)
+        .onClick(btn -> System.out.println("¡Boton plano clickeado!")));
+    rightColumn.addChild(new Button(EverLocation.parse("devevermod",
+        "textures/gui/button.png"), "Boton Textura")
+        .backgroundImages(
+            EverLocation.parse("devevermod", "textures/gui/button.png"),
+            EverLocation.parse("devevermod", "textures/gui/button_disabled.png"))
+        .border(new BorderColor(
+            0xFF007ACC, // Top (Blue)
+            0xFFFF5555, // Right (Red)
+            0xFF55FF55, // Bottom (Green)
+            0xFFFFFF55 // Left (Yellow)
+        ))
+        .onClick(btn -> System.out.println("¡Boton con textura presionado!")));
+    rightColumn.addChild(new Button(EverLocation.parse("devevermod",
+        "textures/gui/button.png"), "Textura Deshabilitada")
+        .backgroundImages(
+            EverLocation.parse("devevermod", "textures/gui/button.png"),
+            EverLocation.parse("devevermod", "textures/gui/button_disabled.png"))
+        .border(1)
+        .onClick(btn -> System.out.println("¡Boton con textura presionado!"))
+        .enabled(false));
 
     // Assembly tree structure
     contentRow.addChild(leftColumn);
