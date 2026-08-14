@@ -1,5 +1,6 @@
 package net.evermod.client.gui.screens;
 
+import net.evermod.EverMod;
 import net.evermod.client.gui.BorderColor;
 import net.evermod.client.gui.layout.Box;
 import net.evermod.client.gui.layout.Column;
@@ -13,6 +14,7 @@ import net.evermod.client.gui.widget.Label;
 import net.evermod.resources.EverLocation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Diagnostic Screen used to test EverUI rendering, hierarchy, and components.
@@ -22,6 +24,9 @@ import net.minecraft.network.chat.Component;
 public class EverScreenDemo extends EverScreen {
 
   private String name = "";
+  ResourceLocation btnBase = EverLocation.parse(EverMod.EVER_ID, "textures/gui/button.png");
+  ResourceLocation btnDisabled =
+      EverLocation.parse(EverMod.EVER_ID, "textures/gui/button_disabled.png");
 
   /**
    * Constructs the diagnostic screen.
@@ -58,7 +63,7 @@ public class EverScreenDemo extends EverScreen {
     Label boxTitle = new Label(
         Component.literal("=== MAIN BOX CONTAINER ===").withStyle(ChatFormatting.GOLD,
             ChatFormatting.BOLD))
-        .shadow(true);
+                .shadow(true);
 
     // 3. ROW Container holding two equal Columns side by side
     int availableRowWidth = boxWidth - 24;
@@ -107,11 +112,8 @@ public class EverScreenDemo extends EverScreen {
         .textColor(0xFFFFFFFF)
         .alignment(LayoutAlignment.CENTER)
         .onClick(btn -> System.out.println("¡Boton plano clickeado!")));
-    rightColumn.addChild(new Button(EverLocation.parse("devevermod",
-        "textures/gui/button.png"), "Boton Textura")
-        .backgroundImages(
-            EverLocation.parse("devevermod", "textures/gui/button.png"),
-            EverLocation.parse("devevermod", "textures/gui/button_disabled.png"))
+    rightColumn.addChild(new Button(btnBase, "Boton Textura")
+        .backgroundImages(btnBase, btnDisabled)
         .border(new BorderColor(
             0xFF007ACC, // Top (Blue)
             0xFFFF5555, // Right (Red)
@@ -119,11 +121,8 @@ public class EverScreenDemo extends EverScreen {
             0xFFFFFF55 // Left (Yellow)
         ))
         .onClick(btn -> System.out.println("¡Boton con textura presionado!")));
-    rightColumn.addChild(new Button(EverLocation.parse("devevermod",
-        "textures/gui/button.png"), "Textura Deshabilitada")
-        .backgroundImages(
-            EverLocation.parse("devevermod", "textures/gui/button.png"),
-            EverLocation.parse("devevermod", "textures/gui/button_disabled.png"))
+    rightColumn.addChild(new Button(btnBase, "Textura Deshabilitada")
+        .backgroundImages(btnBase, btnDisabled)
         .border(1)
         .onClick(btn -> System.out.println("¡Boton con textura presionado!"))
         .enabled(false));
