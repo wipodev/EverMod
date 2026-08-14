@@ -2,30 +2,45 @@ package net.evermod.math;
 
 import org.joml.Vector3f;
 
+/**
+ * Version-specific wrapper for JOML Vector3f (1.20+).
+ */
+public class EverVector3f {
 
-public class EverVector3f extends Vector3f {
+  private final Vector3f handle;
 
   public EverVector3f() {
-    super();
+    this.handle = new Vector3f();
   }
 
   public EverVector3f(float x, float y, float z) {
-    super(x, y, z);
+    this.handle = new Vector3f(x, y, z);
   }
 
   public EverVector3f(Vector3f other) {
-    super(other);
+    this.handle = new Vector3f(other.x, other.y, other.z);
+  }
+
+  public EverVector3f(Object raw) {
+    this.handle = (Vector3f) raw;
+  }
+
+  public float x() {
+    return this.handle.x;
+  }
+
+  public float y() {
+    return this.handle.y;
+  }
+
+  public float z() {
+    return this.handle.z;
   }
 
   /**
-   * Helper method to preserve rotationDegrees syntax from Mojang math.
-   *
-   * @param degrees Rotation angle in degrees.
-   * @return A native EverQuaternion instance.
+   * Unwraps the underlying JOML Vector3f instance.
    */
-  public EverQuaternion rotationDegrees(float degrees) {
-    float radians = (float) Math.toRadians(degrees);
-    return new EverQuaternion(
-        new org.joml.Quaternionf().setAngleAxis(radians, this.x, this.y, this.z));
+  public Vector3f getHandle() {
+    return this.handle;
   }
 }
