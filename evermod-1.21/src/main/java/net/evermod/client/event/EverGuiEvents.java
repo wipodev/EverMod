@@ -18,14 +18,13 @@ public class EverGuiEvents {
     int width = event.getGuiGraphics().guiWidth();
     int height = event.getGuiGraphics().guiHeight();
 
-    // 1. Disparamos el PRE
     EverRenderGuiOverlayEvent.Pre preEvent = new EverRenderGuiOverlayEvent.Pre(
-        event.getGuiGraphics(), partialTick, EVER_ID, width, height);
+        event.getGuiGraphics().pose(), partialTick, EVER_ID, width, height);
 
     if (!MinecraftForge.EVENT_BUS.post(preEvent)) {
-      // 2. Disparamos el POST
-      MinecraftForge.EVENT_BUS.post(new EverRenderGuiOverlayEvent.Post(event.getGuiGraphics(),
-          partialTick, EVER_ID, width, height));
+      MinecraftForge.EVENT_BUS
+          .post(new EverRenderGuiOverlayEvent.Post(event.getGuiGraphics().pose(),
+              partialTick, EVER_ID, width, height));
     }
   }
 }
