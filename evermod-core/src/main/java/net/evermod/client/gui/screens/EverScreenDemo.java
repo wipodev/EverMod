@@ -11,6 +11,7 @@ import net.evermod.client.gui.widget.SolidButton;
 import net.evermod.client.gui.widget.Button;
 import net.evermod.client.gui.widget.InputText;
 import net.evermod.client.gui.widget.Label;
+import net.evermod.client.gui.widget.Slider;
 import net.evermod.resources.EverLocation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -24,6 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 public class EverScreenDemo extends EverScreen {
 
   private String name = "";
+  private double sliderValue = 30.0D;
   ResourceLocation btnBase = EverLocation.parse(EverMod.EVER_ID, "textures/gui/button.png");
   ResourceLocation btnDisabled =
       EverLocation.parse(EverMod.EVER_ID, "textures/gui/button_disabled.png");
@@ -94,6 +96,26 @@ public class EverScreenDemo extends EverScreen {
         .setOnValueChange(newValue -> this.name = newValue);
 
     leftColumn.addChild(nameInput);
+    leftColumn.addChild(Space.height(4));
+
+    // --- ABSTRACT SLIDER DRAGGABLE INTEGRATION ---
+    Label sliderValueLabel = new Label(String.format("Val: %.0f%%", this.sliderValue))
+        .color(0xFFFFFF55)
+        .shadow(true);
+
+    // Instances concrete Slider inheriting smooth dragging behavior from AbstractSlider
+    Slider demoSlider = new Slider(0, 0, 100, 20, 0.0D, 100.0D, this.sliderValue)
+        .step(1.0D)
+        .onChange(newValue -> {
+          this.sliderValue = newValue;
+          sliderValueLabel.setText(String.format("Val: %.0f%%", newValue));
+        });
+
+    Row sliderContainer = new Row().gap(8);
+
+    sliderContainer.addChild(demoSlider);
+    sliderContainer.addChild(sliderValueLabel);
+    leftColumn.addChild(sliderContainer);
 
     // 5. Right Column inside Row
     Column rightColumn = new Column()
