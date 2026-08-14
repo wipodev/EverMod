@@ -9,6 +9,10 @@ import net.evermod.network.io.EverContext;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
+/**
+ * Network packet responsible for triggering, transitioning, or stopping sound events
+ * on the client side for specific entities.
+ */
 @EverPacket
 public class PlaySoundPacket extends PacketBase {
 
@@ -22,7 +26,19 @@ public class PlaySoundPacket extends PacketBase {
   private final @Nonnull String state;
   private final boolean looping;
 
-  // Constructor maestro con todos los parámetros necesarios
+  /**
+   * Primary constructor using raw sound ResourceLocation string.
+   *
+   * @param entityId The target entity ID attached to the sound.
+   * @param soundLocation The string representation of the SoundEvent ResourceLocation.
+   * @param volume Initial sound volume.
+   * @param pitch Initial sound pitch.
+   * @param targetVolume Final target volume for transitions.
+   * @param targetPitch Final target pitch for transitions.
+   * @param transitionTicks Duration in ticks for smooth transitions.
+   * @param state Execution state ("play", "transition", "stop", "stop_all").
+   * @param looping Whether the sound should loop continuously.
+   */
   public PlaySoundPacket(int entityId, String soundLocation, float volume, float pitch,
       float targetVolume, float targetPitch, int transitionTicks, String state, boolean looping) {
     if (Objects.isNull(soundLocation) || soundLocation.isBlank()) {
@@ -42,7 +58,9 @@ public class PlaySoundPacket extends PacketBase {
     this.looping = looping;
   }
 
-  // Sobrecarga para compatibilidad usando SoundEvent directamente
+  /**
+   * Overloaded constructor for direct SoundEvent instance usage.
+   */
   public PlaySoundPacket(int entityId, SoundEvent sound, float volume, float pitch,
       float targetVolume, float targetPitch, int transitionTicks, String state, boolean looping) {
     this(entityId,
@@ -65,6 +83,12 @@ public class PlaySoundPacket extends PacketBase {
     buffer.writeInt(this.looping ? 1 : 0);
   }
 
+  /**
+   * Decodes packet data from the incoming EverBuffer stream.
+   *
+   * @param buffer The incoming buffer containing packet payload.
+   * @return A new PlaySoundPacket instance initialized with decoded data.
+   */
   public static PlaySoundPacket decode(EverBuffer buffer) {
     int entityId = buffer.readInt();
     String soundLocation = buffer.readUtf();
