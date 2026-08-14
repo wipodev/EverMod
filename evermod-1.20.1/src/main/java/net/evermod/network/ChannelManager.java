@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import org.objectweb.asm.Type;
 import net.evermod.network.annotations.EverPacket;
+import net.evermod.network.annotations.EverPacketDirection;
 import net.evermod.network.io.*;
 import net.evermod.network.packets.PacketBase;
 import net.evermod.resources.EverLocation;
@@ -94,18 +95,26 @@ public class ChannelManager {
     }
   }
 
+  private static NetworkDirection toForgeDirection(EverPacketDirection direction) {
+    return direction == EverPacketDirection.TO_SERVER
+        ? NetworkDirection.PLAY_TO_SERVER
+        : NetworkDirection.PLAY_TO_CLIENT;
+  }
+
   private static <T extends PacketBase> void registerTyped(Class<T> packetClass,
       MethodHandles.Lookup lookup) throws Throwable {
     EverPacket annotation = packetClass.getAnnotation(EverPacket.class);
     MethodHandle decodeHandle = lookup.findStatic(packetClass, "decode",
         MethodType.methodType(packetClass, EverBuffer.class));
+    NetworkDirection forgeDirection = toForgeDirection(annotation.direction());
+
     registerPacket(packetClass, buffer -> {
       try {
         return packetClass.cast(decodeHandle.invoke(buffer));
       } catch (Throwable t) {
         throw new RuntimeException("Error decoding " + packetClass.getName(), t);
       }
-    }, annotation.direction());
+    }, forgeDirection);
   }
 
   public static void sendToServer(Object packet) {
