@@ -14,24 +14,9 @@ import net.minecraft.resources.ResourceLocation;
  */
 public abstract class ParentComponent extends AbstractComponent {
 
-  /**
-   * Rendering modes supported for background texture rendering.
-   */
-  public enum BackgroundMode {
-    /** Stretches the texture to cover the container's full dimensions. */
-    STRETCH,
-    /** Centers the texture within the container using its natural dimensions. */
-    CENTER,
-    /** Repeats the texture horizontally and vertically to tile the container. */
-    TILE
-  }
-
   protected final List<UIComponent> children = new ArrayList<>();
   protected int backgroundColor = 0x00000000;
   protected ResourceLocation backgroundImage = null;
-  protected BackgroundMode backgroundMode = BackgroundMode.STRETCH;
-  protected int textureWidth = 256;
-  protected int textureHeight = 256;
   protected Border border = Border.NONE;
   protected BorderColor borderColor = BorderColor.DEFAULT;
   private boolean initialized = false;
@@ -162,103 +147,6 @@ public abstract class ParentComponent extends AbstractComponent {
   // --- BACKGROUND FLUENT SETTERS ---
 
   /**
-   * Gets the current ARGB background color.
-   *
-   * @return ARGB hex color code.
-   */
-  public int getBackgroundColor() {
-    return this.backgroundColor;
-  }
-
-  /**
-   * Gets the active background rendering mode.
-   *
-   * @return Current {@link BackgroundMode}.
-   */
-  public BackgroundMode getBackgroundMode() {
-    return this.backgroundMode;
-  }
-
-  /**
-   * Configures full background properties including texture, dimensions, mode, and color.
-   *
-   * @param texture       ResourceLocation of the texture.
-   * @param textureWidth  Original width of the texture image.
-   * @param textureHeight Original height of the texture image.
-   * @param mode          Scaling or tiling mode.
-   * @param ARGBColor     Solid background ARGB tint or color.
-   * @return This container instance for method chaining.
-   */
-  public ParentComponent background(ResourceLocation texture, int textureWidth, int textureHeight,
-      BackgroundMode mode, int ARGBColor) {
-    this.backgroundImage = texture;
-    this.textureWidth = textureWidth;
-    this.textureHeight = textureHeight;
-    this.backgroundMode = mode;
-    this.backgroundColor = ARGBColor;
-    return this;
-  }
-
-  /**
-   * Configures background texture with explicit dimensions and rendering mode.
-   *
-   * @param texture       ResourceLocation of the texture.
-   * @param textureWidth  Original width of the texture image.
-   * @param textureHeight Original height of the texture image.
-   * @param mode          Scaling or tiling mode.
-   * @return This container instance for method chaining.
-   */
-  public ParentComponent background(ResourceLocation texture, int textureWidth, int textureHeight,
-      BackgroundMode mode) {
-    return background(texture, textureWidth, textureHeight, mode, 0x00000000);
-  }
-
-  /**
-   * Configures background texture with explicit dimensions using STRETCH mode.
-   *
-   * @param texture       ResourceLocation of the texture.
-   * @param textureWidth  Original width of the texture image.
-   * @param textureHeight Original height of the texture image.
-   * @return This container instance for method chaining.
-   */
-  public ParentComponent background(ResourceLocation texture, int textureWidth, int textureHeight) {
-    return background(texture, textureWidth, textureHeight, BackgroundMode.STRETCH);
-  }
-
-  /**
-   * Configures background texture using default 256x256 dimensions, specified mode, and ARGB color.
-   *
-   * @param texture   ResourceLocation of the texture.
-   * @param mode      Scaling or tiling mode.
-   * @param ARGBColor Solid background ARGB tint or color.
-   * @return This container instance for method chaining.
-   */
-  public ParentComponent background(ResourceLocation texture, BackgroundMode mode, int ARGBColor) {
-    return background(texture, 256, 256, mode, ARGBColor);
-  }
-
-  /**
-   * Configures background texture using default 256x256 dimensions and specified mode.
-   *
-   * @param texture ResourceLocation of the texture.
-   * @param mode    Scaling or tiling mode.
-   * @return This container instance for method chaining.
-   */
-  public ParentComponent background(ResourceLocation texture, BackgroundMode mode) {
-    return background(texture, 256, 256, mode);
-  }
-
-  /**
-   * Configures background texture using default 256x256 dimensions and STRETCH mode.
-   *
-   * @param texture ResourceLocation of the texture.
-   * @return This container instance for method chaining.
-   */
-  public ParentComponent background(ResourceLocation texture) {
-    return background(texture, 256, 256, BackgroundMode.STRETCH);
-  }
-
-  /**
    * Sets a solid background ARGB color.
    *
    * @param ARGBColor ARGB hex color code.
@@ -277,6 +165,53 @@ public abstract class ParentComponent extends AbstractComponent {
    */
   public ParentComponent backgroundColor(int ARGBColor) {
     return background(ARGBColor);
+  }
+
+  /**
+   * Configures background texture.
+   *
+   * @param texture ResourceLocation of the texture.
+   * @return This container instance for method chaining.
+   */
+  public ParentComponent background(ResourceLocation texture) {
+    this.backgroundImage = texture;
+    return this;
+  }
+
+  /**
+   * Alias for {@link #background(ResourceLocation)}.
+   *
+   * @param texture ResourceLocation of the texture.
+   * @return This container instance for method chaining.
+   */
+  public ParentComponent backgroundImage(ResourceLocation texture) {
+    return background(texture);
+  }
+
+  /**
+   * Configures full background properties including texture, dimensions, mode, and color.
+   *
+   * @param texture       ResourceLocation of the texture.
+   * @param ARGBColor     Solid background ARGB tint or color.
+   * @return This container instance for method chaining.
+   */
+  public ParentComponent background(ResourceLocation texture, int ARGBColor) {
+    this.backgroundImage = texture;
+    this.backgroundColor = ARGBColor;
+    return this;
+  }
+
+  /**
+   * Gets the current ARGB background color.
+   *
+   * @return ARGB hex color code.
+   */
+  public int getBackgroundColor() {
+    return this.backgroundColor;
+  }
+
+  public ResourceLocation getBackgroundImage() {
+    return this.backgroundImage;
   }
 
   // --- CHILD MANAGEMENT ---
@@ -334,7 +269,6 @@ public abstract class ParentComponent extends AbstractComponent {
     ensureInitialized();
     renderBackground(graphics, mouseX, mouseY, partialTicks);
 
-    // Render all visible children
     for (UIComponent child : this.children) {
       if (child.isVisible()) {
         child.render(graphics, mouseX, mouseY, partialTicks);
@@ -352,60 +286,29 @@ public abstract class ParentComponent extends AbstractComponent {
    */
   protected void renderBackground(EverGraphics graphics, int mouseX, int mouseY,
       float partialTicks) {
-    boolean hasBorder = this.borderColor != null && this.border != Border.NONE;
+    boolean hasBorder = this.border != null && this.border != Border.NONE && this.borderColor != null;
+    boolean hasSolidColor = (this.backgroundColor >> 24 & 0xFF) > 0;
 
-    // 1. Render solid color background
-    if ((this.backgroundColor >> 24 & 0xFF) > 0) {
+    if (hasSolidColor) {
       if (hasBorder) {
-        graphics.drawBorderedRect(this.x, this.y, this.width, this.height,
-            this.backgroundColor, this.border, this.borderColor);
+        graphics.drawRect(this.x, this.y, this.width, this.height, this.backgroundColor,
+            this.border, this.borderColor);
       } else {
-        graphics.drawRect(this.x, this.y, this.x + this.width, this.y + this.height,
-            this.backgroundColor);
+        graphics.drawRect(this.x, this.y, this.width, this.height, this.backgroundColor);
       }
     }
 
-    // 2. Render background image if set
     if (this.backgroundImage != null) {
-      switch (this.backgroundMode) {
-        case CENTER:
-          int centerX = this.x + (this.width - this.textureWidth) / 2;
-          int centerY = this.y + (this.height - this.textureHeight) / 2;
-          graphics.drawTexture(this.backgroundImage, centerX, centerY, this.textureWidth,
-              this.textureHeight, this.textureWidth, this.textureHeight);
-          break;
-
-        case TILE:
-          for (int tileX = 0; tileX < this.width; tileX += this.textureWidth) {
-            for (int tileY = 0; tileY < this.height; tileY += this.textureHeight) {
-              int drawWidth = Math.min(this.textureWidth, this.width - tileX);
-              int drawHeight = Math.min(this.textureHeight, this.height - tileY);
-
-              graphics.drawTexture(this.backgroundImage, this.x + tileX, this.y + tileY, drawWidth,
-                  drawHeight, this.textureWidth, this.textureHeight);
-            }
-          }
-          break;
-
-        case STRETCH:
-        default:
-          if (hasBorder) {
-            graphics.drawBorderTexture(this.backgroundImage, this.x, this.y, this.width,
-                this.height,
-                this.textureWidth, this.textureHeight, this.border, this.borderColor);
-          } else {
-            graphics.drawTexture(this.backgroundImage, this.x, this.y, this.width, this.height,
-                this.textureWidth, this.textureHeight);
-          }
-          break;
+      if (hasBorder) {
+        graphics.drawTexture(this.backgroundImage, this.x, this.y, this.width, this.height,
+            this.border, this.borderColor);
+      } else {
+        graphics.drawTexture(this.backgroundImage, this.x, this.y, this.width, this.height);
       }
     }
 
-    // 3. Render standalone border outline if there was no solid background color or stretched image
-    if (hasBorder && (this.backgroundColor >> 24 & 0xFF) == 0
-        && (this.backgroundImage == null || this.backgroundMode != BackgroundMode.STRETCH)) {
-      graphics.drawOutlineRect(this.x, this.y, this.width, this.height, this.border,
-          this.borderColor);
+    if (hasBorder && !hasSolidColor && this.backgroundImage == null) {
+      graphics.fillBorder(this.x, this.y, this.width, this.height, this.border, this.borderColor);
     }
   }
 
@@ -453,10 +356,15 @@ public abstract class ParentComponent extends AbstractComponent {
   }
 
   /**
-   * {@inheritDoc}
+   * Propagates dual-axis mouse scroll events to child components in reverse rendering order.
+   *
+   * @param mouseX Cursor X position.
+   * @param mouseY Cursor Y position.
+   * @param deltaX Horizontal scroll delta.
+   * @param deltaY Vertical scroll delta.
+   * @return {@code true} if consumed by any child component.
    */
-  @Override
-  public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+  public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
     if (!isVisible() || !isEnabled()) {
       return false;
     }
@@ -465,11 +373,23 @@ public abstract class ParentComponent extends AbstractComponent {
 
     for (int i = this.children.size() - 1; i >= 0; i--) {
       UIComponent child = this.children.get(i);
-      if (child.mouseScrolled(mouseX, mouseY, delta)) {
+      if (child.mouseScrolled(mouseX, mouseY, deltaX, deltaY)) {
         return true;
       }
     }
     return false;
+  }
+
+  /**
+   * Legacy single-axis vertical scroll handler for backward compatibility.
+   *
+   * @param mouseX Cursor X position.
+   * @param mouseY Cursor Y position.
+   * @param delta Vertical scroll delta.
+   * @return {@code true} if consumed by any child component.
+   */
+  public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    return this.mouseScrolled(mouseX, mouseY, 0.0D, delta);
   }
 
   /**

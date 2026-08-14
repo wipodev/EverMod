@@ -12,22 +12,11 @@ import net.evermod.client.gui.UIComponent;
  */
 public class Scrollable extends ParentComponent {
 
-  /** The inner component or container target to be scrolled within this viewport. */
   private UIComponent content;
-
-  /** Current horizontal scroll offset in pixels. */
   private int scrollX = 0;
-
-  /** Current vertical scroll offset in pixels. */
   private int scrollY = 0;
-
-  /** The scroll speed multiplier applied per wheel tick in pixels. */
   private int scrollSpeed = 12;
-
-  /** Flag enabling vertical scrolling using mouse wheel events. */
   private boolean allowVerticalScroll = true;
-
-  /** Flag enabling horizontal scrolling using mouse wheel events. */
   private boolean allowHorizontalScroll = false;
 
   /**
@@ -243,20 +232,16 @@ public class Scrollable extends ParentComponent {
     ensureInitialized();
     updateLayout();
 
-    // 1. Draw container background
     renderBackground(graphics, mouseX, mouseY, partialTicks);
 
-    // 2. Restrict rendering viewport using EverGraphics scissor method
-    graphics.activateScissor(this.x, this.y, this.width, this.height);
+    graphics.enableScissor(this.x, this.y, this.width, this.height);
 
-    // 3. Render inner content
     for (UIComponent child : this.children) {
       if (child.isVisible()) {
         child.render(graphics, mouseX, mouseY, partialTicks);
       }
     }
 
-    // 4. Disable scissor clipping
-    graphics.deactivateScissor();
+    graphics.disableScissor();
   }
 }

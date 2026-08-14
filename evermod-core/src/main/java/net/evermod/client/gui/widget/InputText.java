@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 import net.evermod.client.gui.AbstractComponent;
 import net.evermod.client.gui.EverGraphics;
+import net.evermod.client.gui.render.IEverFont;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -588,20 +589,19 @@ public class InputText extends AbstractComponent {
     }
 
     int currentBorderColor = this.focused ? this.focusedBorderColor : this.borderColor;
-    graphics.drawBorderedRect(this.x, this.y, this.width, this.height,
+    graphics.drawRect(this.x, this.y, this.width, this.height,
         this.backgroundColor, currentBorderColor);
 
-    Font font = graphics.getFont();
+    IEverFont font = graphics.getFont();
     int paddingX = 4;
     int maxTextWidth = this.width - (paddingX * 2);
-    int textY = this.y + (this.height - font.lineHeight) / 2;
+    int textY = this.y + (this.height - font.fontHeight()) / 2;
 
     if (this.displayPos > this.value.length()) {
       this.displayPos = this.value.length();
     }
 
-    graphics.activateScissor(this.x + 2, this.y + 1, this.x + this.width - 2,
-        this.y + this.height - 1);
+    graphics.enableScissor(this.x + 2, this.y + 1, this.width - 4, this.height - 2);
 
     if (this.value.isEmpty() && !this.placeholder.isEmpty()) {
       String visiblePlaceholder = font.plainSubstrByWidth(this.placeholder, maxTextWidth);
@@ -625,7 +625,8 @@ public class InputText extends AbstractComponent {
           int highlightX1 = this.x + paddingX + font.width(textBeforeSel);
           int highlightX2 = highlightX1 + font.width(selectedText);
 
-          graphics.drawRect(highlightX1, textY - 1, highlightX2, textY + font.lineHeight + 1,
+          graphics.drawRect(highlightX1, textY - 1, highlightX2 - highlightX1,
+              font.fontHeight() + 2,
               this.highlightColor);
         }
       }
@@ -641,10 +642,10 @@ public class InputText extends AbstractComponent {
       int cursorX = this.x + paddingX + font.width(textBeforeCursor);
 
       if (cursorX <= this.x + this.width - paddingX) {
-        graphics.drawRect(cursorX, textY - 1, cursorX + 1, textY + font.lineHeight + 1, 0xFFFFFFFF);
+        graphics.drawRect(cursorX, textY - 1, 1, font.fontHeight() + 2, 0xFFFFFFFF);
       }
     }
-    graphics.deactivateScissor();
+    graphics.disableScissor();
   }
 
   /**

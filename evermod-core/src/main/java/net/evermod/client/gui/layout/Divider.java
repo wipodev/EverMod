@@ -15,19 +15,12 @@ public class Divider extends AbstractComponent {
    * Orientation modes available for line rendering.
    */
   public enum Orientation {
-    /** Renders line horizontally across its allocated width. */
     HORIZONTAL,
-    /** Renders line vertically along its allocated height. */
     VERTICAL
   }
 
-  /** Current orientation of the divider line. */
   private Orientation orientation;
-
-  /** Line thickness in pixels. */
   private int thickness;
-
-  /** ARGB hex color code used for line rendering. */
   private int color;
 
   /**

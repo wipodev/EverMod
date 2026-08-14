@@ -17,8 +17,6 @@ public class Button extends AbstractButton {
   private ResourceLocation backgroundImage;
   private ResourceLocation hoverBackgroundImage;
   private ResourceLocation disabledBackgroundImage;
-  private int textureWidth = 198;
-  private int textureHeight = 18;
 
   /**
    * Constructs a Button with a primary background texture at origin (0, 0) and default size (150x20).
@@ -76,30 +74,6 @@ public class Button extends AbstractButton {
     return setBackgroundImages(hover, disabled);
   }
 
-  /**
-   * Sets the source texture dimensions in pixels for UV mapping operations.
-   *
-   * @param width  Source texture sheet width in pixels.
-   * @param height Source texture sheet height in pixels.
-   * @return This button instance for method chaining.
-   */
-  public Button setTextureSize(int width, int height) {
-    this.textureWidth = width;
-    this.textureHeight = height;
-    return this;
-  }
-
-  /**
-   * Fluent API alias for {@link #setTextureSize(int, int)}.
-   *
-   * @param width  Source texture sheet width in pixels.
-   * @param height Source texture sheet height in pixels.
-   * @return This button instance for method chaining.
-   */
-  public Button textureSize(int width, int height) {
-    return setTextureSize(width, height);
-  }
-
   @Override
   protected void renderBackground(EverGraphics graphics, int mouseX, int mouseY, boolean hovered) {
     ResourceLocation activeTexture = !this.enabled ? this.disabledBackgroundImage
@@ -111,13 +85,14 @@ public class Button extends AbstractButton {
     }
 
     BorderColor activeBorderColor = getActiveBorderColor(hovered);
+    boolean hasBorder =
+        this.border != null && this.border != Border.NONE && activeBorderColor != null;
 
-    if (this.border != null && this.border != Border.NONE && activeBorderColor != null) {
-      graphics.drawBorderTexture(activeTexture, this.x, this.y, this.width, this.height,
-          this.textureWidth, this.textureHeight, this.border, activeBorderColor);
+    if (hasBorder) {
+      graphics.drawTexture(activeTexture, this.x, this.y, this.width, this.height, this.border,
+          activeBorderColor);
     } else {
-      graphics.drawTexture(activeTexture, this.x, this.y, this.width, this.height,
-          this.textureWidth, this.textureHeight);
+      graphics.drawTexture(activeTexture, this.x, this.y, this.width, this.height);
     }
   }
 }

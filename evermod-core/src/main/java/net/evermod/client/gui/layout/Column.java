@@ -5,62 +5,53 @@ import net.evermod.client.gui.ParentComponent;
 import net.evermod.client.gui.UIComponent;
 
 /**
- * Horizontal container layout that places child components side-by-side left to right.
+ * Vertical container layout that stacks child components top to bottom.
  * Computes layout positions based on gap, padding, cross-axis alignment, and sizing flags.
  *
  * @author Wipodev
  */
-public class Row extends ParentComponent {
+public class Column extends ParentComponent {
 
-  /** Spacing in pixels between adjacent child components horizontally. */
   private int gap;
-
-  /** Outer inner-padding surrounding child components in pixels. */
   private int padding;
-
-  /** Cross-axis (vertical) alignment for children. Defaults to START. */
   private LayoutAlignment alignment = LayoutAlignment.START;
-
-  /** Flag indicating whether the row stretches/fixes its width rather than auto-wrapping. */
   private boolean fillWidth = false;
-
-  /** Flag indicating whether the row stretches/fixes its height rather than auto-wrapping. */
   private boolean fillHeight = false;
 
   /**
-   * Constructs a Row layout with explicit origin position, gap, and padding.
+   * Constructs a Column layout with explicit origin position, gap, and padding.
    *
    * @param x       Screen X position in pixels.
    * @param y       Screen Y position in pixels.
-   * @param gap     Horizontal spacing between child components in pixels.
+   * @param gap     Vertical spacing between child components in pixels.
    * @param padding Outer inner-padding in pixels.
    */
-  public Row(int x, int y, int gap, int padding) {
+  public Column(int x, int y, int gap, int padding) {
     super(x, y, 0, 0);
     this.gap = gap;
     this.padding = padding;
   }
 
   /**
-   * Constructs a Row layout at origin (0, 0) with a specified gap and zero padding.
+   * Constructs a Column layout at origin (0, 0) with a specified gap and zero padding.
    *
-   * @param gap Horizontal spacing between child components in pixels.
+   * @param gap Vertical spacing between child components in pixels.
    */
-  public Row(int gap) {
+  public Column(int gap) {
     this(0, 0, gap, 0);
   }
 
   /**
-   * Constructs an empty Row layout at origin (0, 0) with zero gap and zero padding.
+   * Constructs an empty Column layout at origin (0, 0) with zero gap and zero padding.
    */
-  public Row() {
+  public Column() {
     this(0, 0, 0, 0);
   }
 
   // --- CONFIGURATION GETTERS & SETTERS ---
 
   /**
-   * Gets the horizontal gap between child components.
+   * Gets the vertical gap between child components.
    *
    * @return Spacing in pixels.
    */
@@ -69,12 +60,12 @@ public class Row extends ParentComponent {
   }
 
   /**
-   * Sets the horizontal gap between child components.
+   * Sets the vertical gap between child components.
    *
    * @param gap Spacing in pixels.
    * @return This container instance for method chaining.
    */
-  public Row setGap(int gap) {
+  public Column setGap(int gap) {
     this.gap = gap;
     updateLayout();
     return this;
@@ -86,7 +77,7 @@ public class Row extends ParentComponent {
    * @param gap Spacing in pixels.
    * @return This container instance for method chaining.
    */
-  public Row gap(int gap) {
+  public Column gap(int gap) {
     return setGap(gap);
   }
 
@@ -105,7 +96,7 @@ public class Row extends ParentComponent {
    * @param padding Padding size in pixels.
    * @return This container instance for method chaining.
    */
-  public Row setPadding(int padding) {
+  public Column setPadding(int padding) {
     this.padding = padding;
     updateLayout();
     return this;
@@ -117,12 +108,12 @@ public class Row extends ParentComponent {
    * @param padding Padding size in pixels.
    * @return This container instance for method chaining.
    */
-  public Row padding(int padding) {
+  public Column padding(int padding) {
     return setPadding(padding);
   }
 
   /**
-   * Gets cross-axis (vertical) alignment.
+   * Gets cross-axis (horizontal) alignment.
    *
    * @return Active {@link LayoutAlignment}.
    */
@@ -131,12 +122,12 @@ public class Row extends ParentComponent {
   }
 
   /**
-   * Sets cross-axis (vertical) alignment for child components.
+   * Sets cross-axis (horizontal) alignment for child components.
    *
-   * @param alignment Desired vertical alignment.
+   * @param alignment Desired horizontal alignment.
    * @return This container instance for method chaining.
    */
-  public Row setAlignment(LayoutAlignment alignment) {
+  public Column setAlignment(LayoutAlignment alignment) {
     this.alignment = alignment != null ? alignment : this.alignment;
     updateLayout();
     return this;
@@ -151,7 +142,7 @@ public class Row extends ParentComponent {
    * @param targetHeight Maximum height to occupy in pixels.
    * @return This container instance for method chaining.
    */
-  public Row fillMaxSize(int targetWidth, int targetHeight) {
+  public Column fillMaxSize(int targetWidth, int targetHeight) {
     this.width = targetWidth;
     this.height = targetHeight;
     this.fillWidth = true;
@@ -166,7 +157,7 @@ public class Row extends ParentComponent {
    * @param targetWidth Maximum width to occupy in pixels.
    * @return This container instance for method chaining.
    */
-  public Row fillMaxWidth(int targetWidth) {
+  public Column fillMaxWidth(int targetWidth) {
     this.width = targetWidth;
     this.fillWidth = true;
     updateLayout();
@@ -179,7 +170,7 @@ public class Row extends ParentComponent {
    * @param targetHeight Maximum height to occupy in pixels.
    * @return This container instance for method chaining.
    */
-  public Row fillMaxHeight(int targetHeight) {
+  public Column fillMaxHeight(int targetHeight) {
     this.height = targetHeight;
     this.fillHeight = true;
     updateLayout();
@@ -192,36 +183,35 @@ public class Row extends ParentComponent {
    * Recalculates relative positions and dimensions for all child components.
    */
   public void updateLayout() {
-    int currentX = this.x + this.padding;
-    int maxHeight = 0;
+    int currentY = this.y + this.padding;
+    int maxWidth = 0;
 
     for (UIComponent child : this.children) {
       if (!child.isVisible()) {
         continue;
       }
 
-      // Set X position relative to cumulative horizontal flow
-      child.setX(currentX);
+      // Set Y position relative to cumulative vertical flow
+      child.setY(currentY);
 
-      // Compute maximum height across all visible children
-      if (child.getHeight() > maxHeight) {
-        maxHeight = child.getHeight();
+      // Compute maximum width across all visible children
+      if (child.getWidth() > maxWidth) {
+        maxWidth = child.getWidth();
       }
 
-      // Advance cumulative width for next child
-      currentX += child.getWidth() + this.gap;
+      // Advance cumulative height for next child
+      currentY += child.getHeight() + this.gap;
     }
 
     // Subtract extra trailing spacing if there were children
     if (!this.children.isEmpty()) {
-      currentX -= this.gap;
+      currentY -= this.gap;
     }
 
-    // If height is not fixed, wrap around the maximum content height
-    int availableHeight =
-        this.fillHeight ? Math.max(0, this.height - (this.padding * 2)) : maxHeight;
+    // If width is not fixed, wrap around the maximum content width
+    int availableWidth = this.fillWidth ? Math.max(0, this.width - (this.padding * 2)) : maxWidth;
 
-    // Apply cross-axis (Y) alignment
+    // Apply cross-axis (X) alignment
     for (UIComponent child : this.children) {
       if (!child.isVisible()) {
         continue;
@@ -229,24 +219,24 @@ public class Row extends ParentComponent {
 
       switch (this.alignment) {
         case CENTER:
-          child.setY(this.y + this.padding + (availableHeight - child.getHeight()) / 2);
+          child.setX(this.x + this.padding + (availableWidth - child.getWidth()) / 2);
           break;
         case END:
-          child.setY(this.y + this.padding + (availableHeight - child.getHeight()));
+          child.setX(this.x + this.padding + (availableWidth - child.getWidth()));
           break;
         case START:
         default:
-          child.setY(this.y + this.padding);
+          child.setX(this.x + this.padding);
           break;
       }
     }
 
     // Wrap dimensions if explicit fill flags are disabled
     if (!this.fillWidth) {
-      this.width = (currentX - this.x) + this.padding;
+      this.width = maxWidth + (this.padding * 2);
     }
     if (!this.fillHeight) {
-      this.height = maxHeight + (this.padding * 2);
+      this.height = (currentY - this.y) + this.padding;
     }
   }
 

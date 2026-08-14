@@ -6,6 +6,7 @@ import net.evermod.client.gui.Border;
 import net.evermod.client.gui.BorderColor;
 import net.evermod.client.gui.EverGraphics;
 import net.evermod.client.gui.layout.LayoutAlignment;
+import net.evermod.client.gui.render.IEverFont;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -310,7 +311,7 @@ public abstract class AbstractButton extends AbstractComponent {
    */
   protected void renderLabel(EverGraphics graphics, boolean hovered) {
     String labelText = getText();
-    Font font = graphics.getFont();
+    IEverFont font = graphics.getFont();
 
     int borderLeft = (this.border != null) ? this.border.left() : 0;
     int borderRight = (this.border != null) ? this.border.right() : 0;
@@ -336,7 +337,7 @@ public abstract class AbstractButton extends AbstractComponent {
         break;
     }
 
-    int renderY = this.y + borderTop + (usableHeight - font.lineHeight) / 2;
+    int renderY = this.y + borderTop + (usableHeight - font.fontHeight()) / 2;
     int activeTextColor = !this.enabled ? this.disabledTextColor
         : (hovered ? this.hoverTextColor : this.textColor);
 

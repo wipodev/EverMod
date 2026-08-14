@@ -156,12 +156,25 @@ public interface UIComponent {
   }
 
   /**
-   * Handles mouse scroll wheel movements.
+   * Handles dual-axis scroll wheel input.
    *
    * @param mouseX Cursor X position.
    * @param mouseY Cursor Y position.
-   * @param delta  Scroll wheel movement magnitude and direction.
-   * @return True if the event was consumed.
+   * @param deltaX Horizontal scroll delta.
+   * @param deltaY Vertical scroll delta.
+   * @return {@code true} if consumed by this component.
+   */
+  default boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
+    return this.mouseScrolled(mouseX, mouseY, deltaY);
+  }
+
+  /**
+   * Handles vertical scroll wheel input.
+   *
+   * @param mouseX Cursor X position.
+   * @param mouseY Cursor Y position.
+   * @param delta Vertical scroll delta.
+   * @return {@code true} if consumed by this component.
    */
   default boolean mouseScrolled(double mouseX, double mouseY, double delta) {
     return false;

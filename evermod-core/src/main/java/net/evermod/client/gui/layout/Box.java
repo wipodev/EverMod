@@ -12,13 +12,8 @@ import net.evermod.client.gui.UIComponent;
  */
 public class Box extends ParentComponent {
 
-  /** Active horizontal alignment for children inside the box. Defaults to START. */
   private LayoutAlignment horizontalAlignment = LayoutAlignment.START;
-
-  /** Active vertical alignment for children inside the box. Defaults to START. */
   private LayoutAlignment verticalAlignment = LayoutAlignment.START;
-
-  /** Outer inner-padding surrounding child components in pixels. */
   private int padding = 0;
 
   /**

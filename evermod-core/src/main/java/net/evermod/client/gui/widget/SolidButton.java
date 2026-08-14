@@ -133,10 +133,10 @@ public class SolidButton extends AbstractButton {
     BorderColor activeBorderColor = getActiveBorderColor(hovered);
 
     if (this.border != null && this.border != Border.NONE && activeBorderColor != null) {
-      graphics.drawBorderedRect(this.x, this.y, this.width, this.height, activeColor, this.border,
+      graphics.drawRect(this.x, this.y, this.width, this.height, activeColor, this.border,
           activeBorderColor);
     } else {
-      graphics.drawRect(this.x, this.y, this.x + this.width, this.y + this.height, activeColor);
+      graphics.drawRect(this.x, this.y, this.width, this.height, activeColor);
     }
   }
 }
