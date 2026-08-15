@@ -1,4 +1,4 @@
-package net.evermod.client.gui;
+package net.evermod.client.graphics.geometry;
 
 /**
  * Represents a screen rectangle for UI clipping operations using doubles

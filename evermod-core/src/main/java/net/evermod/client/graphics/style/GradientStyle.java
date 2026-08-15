@@ -1,4 +1,4 @@
-package net.evermod.client.gui.render;
+package net.evermod.client.graphics.style;
 
 /**
  * Immutable representation of quadrilateral vertex color mappings for solid and gradient rendering.
@@ -15,6 +15,9 @@ public record GradientStyle(
 
   /**
    * Creates a solid color mapping for all 4 vertices.
+   *
+   * @param color ARGB color integer
+   * @return GradientStyle mapping for a solid quad
    */
   public static GradientStyle solid(int color) {
     return gradient(color, color, Direction.VERTICAL);
@@ -22,6 +25,11 @@ public record GradientStyle(
 
   /**
    * Creates a directional gradient mapping.
+   *
+   * @param colorFrom ARGB starting color
+   * @param colorTo ARGB target color
+   * @param direction direction of the gradient
+   * @return calculated GradientStyle
    */
   public static GradientStyle gradient(int colorFrom, int colorTo, Direction direction) {
     float a1 = (colorFrom >> 24 & 255) / 255.0F;
@@ -64,6 +72,12 @@ public record GradientStyle(
 
   /**
    * Creates a custom 4-corner color mapping (useful for freeform or radial approximation).
+   *
+   * @param topLeft ARGB top-left color
+   * @param topRight ARGB top-right color
+   * @param bottomRight ARGB bottom-right color
+   * @param bottomLeft ARGB bottom-left color
+   * @return custom GradientStyle
    */
   public static GradientStyle corners(int topLeft, int topRight, int bottomRight, int bottomLeft) {
     return new GradientStyle(

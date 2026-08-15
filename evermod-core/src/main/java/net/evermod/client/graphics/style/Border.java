@@ -1,4 +1,4 @@
-package net.evermod.client.gui;
+package net.evermod.client.graphics.style;
 
 /**
  * Immutable record representing 4-sided border thicknesses in pixels.

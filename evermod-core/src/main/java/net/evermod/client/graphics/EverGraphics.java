@@ -1,8 +1,11 @@
-package net.evermod.client.gui;
+package net.evermod.client.graphics;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.evermod.client.gui.render.GradientStyle;
-import net.evermod.client.gui.render.GradientStyle.Direction;
+import net.evermod.client.graphics.geometry.InnerBounds;
+import net.evermod.client.graphics.style.Border;
+import net.evermod.client.graphics.style.BorderColor;
+import net.evermod.client.graphics.style.GradientStyle;
+import net.evermod.client.graphics.style.GradientStyle.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 

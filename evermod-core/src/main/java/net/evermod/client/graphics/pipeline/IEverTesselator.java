@@ -1,4 +1,4 @@
-package net.evermod.client.gui.render;
+package net.evermod.client.graphics.pipeline;
 
 /**
  * Interface providing version-agnostic vertex buffering operations.
@@ -9,11 +9,15 @@ public interface IEverTesselator {
 
   /**
    * Begins building vertices for position-color primitives.
+   *
+   * @return active buffer builder instance
    */
   IEverBufferBuilder beginPositionColor();
 
   /**
    * Begins building vertices for position-texture primitives.
+   *
+   * @return active buffer builder instance
    */
   IEverBufferBuilder beginPositionTex();
 

@@ -1,4 +1,4 @@
-package net.evermod.client.gui;
+package net.evermod.client.graphics.style;
 
 /**
  * Represents ARGB colors for each individual side of a component border.

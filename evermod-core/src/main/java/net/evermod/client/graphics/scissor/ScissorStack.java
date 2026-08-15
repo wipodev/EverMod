@@ -1,7 +1,8 @@
-package net.evermod.client.gui;
+package net.evermod.client.graphics.scissor;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import net.evermod.client.graphics.geometry.ScreenRectangle;
 
 /**
  * Manages a stack of nested scissor rectangles to prevent child UI elements

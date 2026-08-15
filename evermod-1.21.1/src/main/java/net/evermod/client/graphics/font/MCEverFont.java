@@ -1,4 +1,4 @@
-package net.evermod.client.gui.render;
+package net.evermod.client.graphics.font;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -7,10 +7,11 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 
 /**
+ * Minecraft implementation of the {@link EverFont} interface.
  *
  * @author Wipodev
  */
-public class EverFont implements IEverFont {
+public class MCEverFont implements EverFont {
 
   private final Font font = Minecraft.getInstance().font;
 

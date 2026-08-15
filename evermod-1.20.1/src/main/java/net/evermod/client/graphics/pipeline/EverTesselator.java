@@ -1,4 +1,4 @@
-package net.evermod.client.gui.render;
+package net.evermod.client.graphics.pipeline;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.evermod.math.EverMatrix4f;
 
 /**
- * Minecraft 1.20.1 implementation of vertex batching pipeline.
+ * Version-specific implementation of the vertex batching pipeline.
  *
  * @author Wipodev
  */

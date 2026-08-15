@@ -1,4 +1,6 @@
-package net.evermod.client.gui;
+package net.evermod.client.graphics.geometry;
+
+import net.evermod.client.graphics.style.Border;
 
 /**
  * Calculates and holds inner content boundaries and border metrics for UI elements,
@@ -19,6 +21,17 @@ public record InnerBounds(
     int y2,
     int innerX2,
     int innerY2) {
+
+  /**
+   * Computes the inner boundary coordinates and metrics based on outer bounds and border widths.
+   *
+   * @param border the border layout specifications (can be null)
+   * @param x top-left X coordinate of the outer boundary
+   * @param y top-left Y coordinate of the outer boundary
+   * @param width total outer width
+   * @param height total outer height
+   * @return computed {@link InnerBounds} instance
+   */
   public static InnerBounds of(Border border, int x, int y, int width, int height) {
     int l = (border != null) ? border.left() : 0;
     int t = (border != null) ? border.top() : 0;

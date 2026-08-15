@@ -1,14 +1,19 @@
-package net.evermod.client.gui;
+package net.evermod.client.graphics;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.evermod.client.gui.render.EverFont;
-import net.evermod.client.gui.render.EverTesselator;
-import net.evermod.client.gui.render.GradientStyle;
-import net.evermod.client.gui.render.IEverBufferBuilder;
-import net.evermod.client.gui.render.IEverFont;
-import net.evermod.client.gui.render.IEverTesselator;
+import net.evermod.client.graphics.font.EverFont;
+import net.evermod.client.graphics.font.MCEverFont;
+import net.evermod.client.graphics.geometry.InnerBounds;
+import net.evermod.client.graphics.geometry.ScreenRectangle;
+import net.evermod.client.graphics.pipeline.EverTesselator;
+import net.evermod.client.graphics.pipeline.IEverBufferBuilder;
+import net.evermod.client.graphics.pipeline.IEverTesselator;
+import net.evermod.client.graphics.scissor.ScissorStack;
+import net.evermod.client.graphics.style.Border;
+import net.evermod.client.graphics.style.BorderColor;
+import net.evermod.client.graphics.style.GradientStyle;
 import net.evermod.math.EverMatrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
@@ -26,11 +31,11 @@ public abstract class AbstractEverGraphics {
   protected static final IEverTesselator TESSELATOR = new EverTesselator();
   private final ScissorStack scissorStack = new ScissorStack();
   protected final PoseStack poseStack;
-  protected final IEverFont font;
+  protected final EverFont font;
 
   protected AbstractEverGraphics(PoseStack poseStack) {
     this.poseStack = poseStack;
-    this.font = new EverFont();
+    this.font = new MCEverFont();
   }
 
   protected EverMatrix4f getActiveMatrix() {
@@ -41,7 +46,7 @@ public abstract class AbstractEverGraphics {
     return this.poseStack;
   }
 
-  public IEverFont getFont() {
+  public EverFont getFont() {
     return this.font;
   }
 
