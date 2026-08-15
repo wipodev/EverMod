@@ -280,6 +280,33 @@ public abstract class ParentComponent extends AbstractComponent {
         child.render(graphics, mouseX, mouseY, partialTicks);
       }
     }
+
+    renderOverlayPass(graphics, mouseX, mouseY);
+  }
+
+  /**
+   * Propagates overlay rendering across the component tree.
+   *
+   * @param graphics Canvas graphics context.
+   * @param mouseX   Current cursor X position.
+   * @param mouseY   Current cursor Y position.
+   */
+  public void renderOverlayPass(EverGraphics graphics, int mouseX, int mouseY) {
+    for (UIComponent child : this.children) {
+      if (!child.isVisible()) {
+        continue;
+      }
+
+      // Render overlay if the child supports it and is currently active
+      if (child instanceof OverlayProvider provider && provider.isOverlayActive()) {
+        provider.renderOverlay(graphics, mouseX, mouseY);
+      }
+
+      // Propagate pass down to nested containers
+      if (child instanceof ParentComponent parentChild) {
+        parentChild.renderOverlayPass(graphics, mouseX, mouseY);
+      }
+    }
   }
 
   /**

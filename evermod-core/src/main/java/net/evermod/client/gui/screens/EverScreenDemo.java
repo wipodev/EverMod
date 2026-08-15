@@ -12,6 +12,7 @@ import net.evermod.client.gui.widget.Button;
 import net.evermod.client.gui.widget.Checkbox;
 import net.evermod.client.gui.widget.InputText;
 import net.evermod.client.gui.widget.Label;
+import net.evermod.client.gui.widget.Select;
 import net.evermod.client.gui.widget.Slider;
 import net.evermod.resources.EverLocation;
 import net.minecraft.ChatFormatting;
@@ -98,7 +99,6 @@ public class EverScreenDemo extends EverScreen {
         .setOnValueChange(newValue -> this.name = newValue);
 
     leftColumn.addChild(nameInput);
-    leftColumn.addChild(Space.height(4));
 
     // --- ABSTRACT SLIDER DRAGGABLE INTEGRATION ---
     Label sliderValueLabel = new Label(String.format("Val: %.0f%%", this.sliderValue))
@@ -118,7 +118,17 @@ public class EverScreenDemo extends EverScreen {
     sliderContainer.addChild(demoSlider);
     sliderContainer.addChild(sliderValueLabel);
     leftColumn.addChild(sliderContainer);
-    leftColumn.addChild(Space.height(4));
+
+    // Theme Dropdown Select Component
+    Select<String> themeSelect = new Select<String>(0, 0, 150, 20)
+        .addOption("dark", "Dark Theme")
+        .addOption("light", "Light Theme")
+        .addOption("ocean", "Ocean Blue")
+        .addOption("custom", "Custom RGB")
+        .selectedValue("dark")
+        .onChange(selectedTheme -> System.out.println("Selected theme: " + selectedTheme));
+
+    leftColumn.addChild(themeSelect);
 
     // --- CHECKBOX INTEGRATION ---
     Checkbox demoCheckbox =
