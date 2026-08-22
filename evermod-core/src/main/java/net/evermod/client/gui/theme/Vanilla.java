@@ -51,7 +51,11 @@ public final class Vanilla {
   }
 
   public static Checkbox checkbox() {
-    return new Checkbox(false)
+    Checkbox checkbox = new Checkbox(false)
         .padding(2);
+    checkbox.getBox()
+        .background(0xFF222222)
+        .border(Border.DEFAULT, BorderColor.all(0xFF000000), BorderColor.all(0xFFFFFFFF));
+    return checkbox;
   }
 }

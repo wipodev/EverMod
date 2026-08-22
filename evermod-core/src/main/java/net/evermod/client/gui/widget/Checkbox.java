@@ -3,8 +3,6 @@ package net.evermod.client.gui.widget;
 import java.util.function.Consumer;
 import net.evermod.client.graphics.EverGraphics;
 import net.evermod.client.graphics.font.EverFont;
-import net.evermod.client.graphics.style.Border;
-import net.evermod.client.graphics.style.BorderColor;
 import net.evermod.client.gui.core.AbstractWidget;
 import net.minecraft.network.chat.Component;
 
@@ -15,21 +13,27 @@ public class Checkbox extends AbstractWidget<Checkbox> {
   }
 
   private int boxSize = 14;
-  private int boxColor = 0xFF222222;
-  private int boxBorderColor = 0xFF000000;
-  private int boxHoverBorderColor = 0xFFFFFFFF;
-  private int boxDisabledBorderColor = 0xFF888888;
-  private int checkColor = 0xFF55FF55;
   private int gap = 5;
+  private int checkColor = 0xFF55FF55;
+  private int checkPadding = 3;
   protected boolean checked;
   protected Consumer<Boolean> onChangeAction;
+  protected final Button box;
   protected final Label label;
   private TextPosition textCheckPosition = TextPosition.RIGHT;
 
   public Checkbox(boolean initialValue) {
     super(0, 0, 0, 0);
     this.checked = initialValue;
+    this.box = new Button() {
+      @Override
+      public boolean isHovered(double pointX, double pointY) {
+        return Checkbox.this.isHovered(pointX, pointY);
+      }
+    };
     this.label = new Label();
+
+    this.box.setParent(this);
     this.label.setParent(this);
   }
 
@@ -42,12 +46,20 @@ public class Checkbox extends AbstractWidget<Checkbox> {
     if (this.label.getText() == null || this.label.getText().isBlank()) {
       return this.boxSize;
     }
-    return this.boxSize + this.gap + getFont().width(this.label.getText());
+    return this.boxSize + this.gap + this.getFont().width(this.label.getText());
   }
 
   @Override
   protected int calculateContentHeight() {
-    return Math.max(this.boxSize, getFont().fontHeight());
+    return Math.max(this.boxSize, this.getFont().fontHeight());
+  }
+
+  public Button getBox() {
+    return this.box;
+  }
+
+  public Label getLabel() {
+    return this.label;
   }
 
   public int getBoxSize() {
@@ -56,34 +68,6 @@ public class Checkbox extends AbstractWidget<Checkbox> {
 
   public Checkbox boxSize(int size) {
     this.boxSize = size;
-    return self();
-  }
-
-  private int getCurrentBoxBorderColor() {
-    if (!this.enabled) {
-      return this.boxDisabledBorderColor;
-    }
-    if (this.hovered) {
-      return this.boxHoverBorderColor;
-    }
-    return this.boxBorderColor;
-  }
-
-  public Checkbox colorBox(int checkColor, int boxColor, int borderBox) {
-    this.boxColor = boxColor;
-    this.checkColor = checkColor;
-    this.boxBorderColor = borderBox;
-    return self();
-  }
-
-  public Checkbox colorBox(int checkColor, int borderBox) {
-    this.checkColor = checkColor;
-    this.boxBorderColor = borderBox;
-    return self();
-  }
-
-  public Checkbox colorBox(int checkColor) {
-    this.checkColor = checkColor;
     return self();
   }
 
@@ -96,8 +80,14 @@ public class Checkbox extends AbstractWidget<Checkbox> {
     return self();
   }
 
-  public Label getLabel() {
-    return this.label;
+  public Checkbox checkColor(int color) {
+    this.checkColor = color;
+    return self();
+  }
+
+  public Checkbox checkPadding(int padding) {
+    this.checkPadding = padding;
+    return self();
   }
 
   public Checkbox text(String text) {
@@ -143,12 +133,11 @@ public class Checkbox extends AbstractWidget<Checkbox> {
     return self();
   }
 
-
   @Override
   public boolean mouseClicked(double mouseX, double mouseY, int button) {
     if (super.mouseClicked(mouseX, mouseY, button)) {
       if (button == 0) {
-        toggle();
+        this.toggle();
         return true;
       }
     }
@@ -158,18 +147,17 @@ public class Checkbox extends AbstractWidget<Checkbox> {
   @Override
   protected void renderContent(
       EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-    int padTop = getContentPaddingTop();
-    int padBottom = getContentPaddingBottom();
-    int padLeft = getContentPaddingLeft();
+    int padTop = this.getContentPaddingTop();
+    int padBottom = this.getContentPaddingBottom();
+    int padLeft = this.getContentPaddingLeft();
 
     String text = this.label.getText();
     boolean hasText = text != null && !text.isBlank();
     int textWidth = 0;
     int fontHeight = 0;
-    EverFont font = null;
 
     if (hasText) {
-      font = getFont();
+      EverFont font = this.getFont();
       textWidth = font.width(text);
       fontHeight = font.fontHeight();
     }
@@ -190,13 +178,18 @@ public class Checkbox extends AbstractWidget<Checkbox> {
     int availableHeight = this.height - padTop - padBottom;
     int boxY = padTop + (availableHeight - this.boxSize) / 2;
 
-    graphics.drawRect(boxX, boxY, this.boxSize, this.boxSize, this.boxColor,
-        getCurrentBoxBorderColor());
+    this.box.enabled(this.enabled);
+    this.box.bounds(boxX, boxY, this.boxSize, this.boxSize);
+    this.box.render(graphics, mouseX, mouseY, partialTicks);
 
     if (this.checked) {
-      int pad = 3;
-      graphics.drawRect(boxX + pad, boxY + pad, this.boxSize - (pad * 2), this.boxSize - (pad * 2),
-          this.checkColor);
+      int checkX = boxX + this.checkPadding;
+      int checkY = boxY + this.checkPadding;
+      int checkSize = this.boxSize - (this.checkPadding * 2);
+
+      if (checkSize > 0) {
+        graphics.drawRect(checkX, checkY, checkSize, checkSize, this.checkColor);
+      }
     }
 
     if (hasText) {
