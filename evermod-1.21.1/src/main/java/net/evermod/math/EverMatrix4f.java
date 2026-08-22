@@ -18,6 +18,14 @@ public class EverMatrix4f {
     this.handle = (Matrix4f) raw;
   }
 
+  public double getTranslationX() {
+    return this.handle.m30();
+  }
+
+  public double getTranslationY() {
+    return this.handle.m31();
+  }
+
   /**
    * Unwraps the underlying JOML Matrix4f instance.
    */

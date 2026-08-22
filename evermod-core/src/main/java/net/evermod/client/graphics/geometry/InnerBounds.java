@@ -3,29 +3,44 @@ package net.evermod.client.graphics.geometry;
 import net.evermod.client.graphics.style.Border;
 
 /**
- * Calculates and holds inner content boundaries and border metrics for UI elements,
- * eliminating redundant margin and padding math across renderers.
+ * Holds 2D spatial boundary coordinates for outer and inner bounds of a UI element.
+ *
+ * @param x Outer top-left X coordinate.
+ * @param y Outer top-left Y coordinate.
+ * @param x2 Outer bottom-right X coordinate.
+ * @param y2 Outer bottom-right Y coordinate.
+ * @param innerX Inner top-left X coordinate.
+ * @param innerY Inner top-left Y coordinate.
+ * @param innerX2 Inner bottom-right X coordinate.
+ * @param innerY2 Inner bottom-right Y coordinate.
  *
  * @author Wipodev
  */
-public record InnerBounds(
-    int left,
-    int top,
-    int right,
-    int bottom,
-    int innerX,
-    int innerY,
-    int innerWidth,
-    int innerHeight,
-    int x2,
-    int y2,
-    int innerX2,
+public record InnerBounds(int x, int y, int x2, int y2, int innerX, int innerY, int innerX2,
     int innerY2) {
 
   /**
-   * Computes the inner boundary coordinates and metrics based on outer bounds and border widths.
+   * Expands all boundary coordinates outward by a given offset.
    *
-   * @param border the border layout specifications (can be null)
+   * @param amount pixel offset to expand
+   * @return new expanded {@link InnerBounds} instance
+   */
+  public InnerBounds expand(int amount) {
+    return new InnerBounds(
+        this.x - amount,
+        this.y - amount,
+        this.x2 + amount,
+        this.y2 + amount,
+        this.innerX - amount,
+        this.innerY - amount,
+        this.innerX2 + amount,
+        this.innerY2 + amount);
+  }
+
+  /**
+   * Computes spatial boundary coordinates based on outer bounds and border specifications.
+   *
+   * @param border border layout specifications (can be null)
    * @param x top-left X coordinate of the outer boundary
    * @param y top-left Y coordinate of the outer boundary
    * @param width total outer width
@@ -33,21 +48,18 @@ public record InnerBounds(
    * @return computed {@link InnerBounds} instance
    */
   public static InnerBounds of(Border border, int x, int y, int width, int height) {
-    int l = (border != null) ? border.left() : 0;
-    int t = (border != null) ? border.top() : 0;
-    int r = (border != null) ? border.right() : 0;
-    int b = (border != null) ? border.bottom() : 0;
+    int left = (border != null) ? border.left() : 0;
+    int top = (border != null) ? border.top() : 0;
+    int right = (border != null) ? border.right() : 0;
+    int bottom = (border != null) ? border.bottom() : 0;
 
-    int iX = x + l;
-    int iY = y + t;
-    int iWidth = Math.max(0, width - l - r);
-    int iHeight = Math.max(0, height - t - b);
+    int x2 = x + width;
+    int y2 = y + height;
+    int innerX = x + left;
+    int innerY = y + top;
+    int innerX2 = x2 - right;
+    int innerY2 = y2 - bottom;
 
-    int outerX2 = x + width;
-    int outerY2 = y + height;
-    int iX2 = outerX2 - r;
-    int iY2 = outerY2 - b;
-
-    return new InnerBounds(l, t, r, b, iX, iY, iWidth, iHeight, outerX2, outerY2, iX2, iY2);
+    return new InnerBounds(x, y, x2, y2, innerX, innerY, innerX2, innerY2);
   }
 }
