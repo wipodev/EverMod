@@ -1,7 +1,7 @@
 package net.evermod.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.evermod.client.gui.EverGraphics;
+import net.evermod.client.graphics.EverGraphics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;

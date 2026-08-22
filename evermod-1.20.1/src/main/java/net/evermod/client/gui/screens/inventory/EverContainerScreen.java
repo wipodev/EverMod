@@ -1,6 +1,6 @@
 package net.evermod.client.gui.screens.inventory;
 
-import net.evermod.client.gui.EverGraphics;
+import net.evermod.client.graphics.EverGraphics;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;

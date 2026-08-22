@@ -1,7 +1,7 @@
 package net.evermod.client.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.evermod.client.gui.screens.EverScreenDemo;
+import net.evermod.client.gui.screens.demo.EverDemo;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -81,7 +81,7 @@ public class ClientInputHandler {
       }
 
       while (DEMO_KEY_MAPPING.consumeClick()) {
-        mc.setScreen(new EverScreenDemo());
+        mc.setScreen(new EverDemo());
       }
 
       while (BLOOD_SKY_KEY_MAPPING.consumeClick()) {

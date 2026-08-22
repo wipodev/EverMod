@@ -41,7 +41,7 @@ public class EverGraphics extends AbstractEverGraphics {
         GradientStyle.solid(backgroundColor));
 
     if (border != null && borderColor != null) {
-      fillBorder(x, y, width, height, border, borderColor);
+      fillBorder(bounds, border, borderColor);
     }
   }
 
@@ -72,8 +72,21 @@ public class EverGraphics extends AbstractEverGraphics {
     fill(bounds.innerX(), bounds.innerY(), bounds.innerX2(), bounds.innerY2(), style);
 
     if (border != null && borderColor != null) {
-      fillBorder(x, y, width, height, border, borderColor);
+      fillBorder(bounds, border, borderColor);
     }
+  }
+
+  public void drawFramedGradientRect(int x, int y, int width, int height, GradientStyle background,
+      GradientStyle borderTop, GradientStyle borderRight, GradientStyle borderBottom,
+      GradientStyle borderLeft) {
+
+    InnerBounds bounds = InnerBounds.of(Border.DEFAULT, x, y, width, height);
+    InnerBounds expandBounds = bounds.expand(1);
+
+    fill(expandBounds.innerX(), expandBounds.innerY(), expandBounds.innerX2(),
+        expandBounds.innerY2(), background);
+    fillFlatBorder(expandBounds, Border.DEFAULT, background);
+    fillBorder(bounds, Border.DEFAULT, borderTop, borderRight, borderBottom, borderLeft);
   }
 
   public void drawTexture(ResourceLocation texture, int x, int y, int width, int height) {
@@ -136,17 +149,17 @@ public class EverGraphics extends AbstractEverGraphics {
         red, green, blue, alpha);
 
     if (border != null && borderColor != null) {
-      fillBorder(x, y, width, height, border, borderColor);
+      fillBorder(bounds, border, borderColor);
     }
   }
 
   public void drawCenteredString(String text, int x, int y, int color, boolean shadow) {
-    int textWidth = this.font.width(text);
+    int textWidth = this.FONT.width(text);
     drawString(text, x - textWidth / 2, y, color, shadow);
   }
 
   public void drawCenteredString(Component component, int x, int y, int color, boolean shadow) {
-    int textWidth = this.font.width(component);
+    int textWidth = this.FONT.width(component);
     drawString(component, x - textWidth / 2, y, color, shadow);
   }
 }

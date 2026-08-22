@@ -1,7 +1,7 @@
 package net.evermod.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.evermod.client.gui.EverGraphics;
+import net.evermod.client.graphics.EverGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;

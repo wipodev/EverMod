@@ -1,7 +1,7 @@
 package net.evermod.client.event;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.evermod.client.gui.EverGraphics;
+import net.evermod.client.graphics.EverGraphics;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
