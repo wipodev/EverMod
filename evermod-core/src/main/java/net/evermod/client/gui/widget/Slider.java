@@ -1,115 +1,237 @@
 package net.evermod.client.gui.widget;
 
-import net.evermod.client.gui.Border;
-import net.evermod.client.gui.BorderColor;
-import net.evermod.client.gui.EverGraphics;
+import net.evermod.client.graphics.EverGraphics;
+import net.evermod.client.graphics.font.EverFont;
+import net.evermod.client.gui.api.style.TextAlignment;
+import net.evermod.client.gui.core.AbstractWidget;
+import net.evermod.math.EverMath;
+import net.minecraft.network.chat.Component;
+import java.util.function.Consumer;
 
-/**
- * Concrete implementation of AbstractSlider rendering vector/flat style tracks and handles.
- * Uses normalized values for rendering calculations aligned with Minecraft GUI mechanics.
- *
- * @author Wipodev
- */
-public class Slider extends AbstractSlider {
+public class Slider extends AbstractWidget<Slider> {
 
-  private int trackHeight = 4;
-  private int backgroundColor = 0xFF222222;
-  private int filledColor = 0xFF3B82F6;
-  private int handleColor = 0xFFFFFFFF;
-  private int handleHoverColor = 0xFFE0E0E0;
+  protected double minValue = 0.0D;
+  protected double maxValue = 100.0D;
+  protected double value = 0.0D;
+  protected double step = 0.0D;
+  protected int handleWidth = 8;
+  protected boolean dragging = false;
+  protected Consumer<Double> onChangeAction;
+  protected final Button handle;
+  protected final Label label;
+  private Component text;
+  private int labelOffsetX = 0;
+  private int labelOffsetY = 0;
 
-  private Border border = Border.DEFAULT;
-  private BorderColor borderColor = BorderColor.all(0xFF555555);
-
-  /**
-   * Constructs a Slider widget with explicit position, dimensions, and numerical bounds.
-   *
-   * @param x            Screen X position in pixels.
-   * @param y            Screen Y position in pixels.
-   * @param width        Slider width in pixels.
-   * @param height       Slider height in pixels.
-   * @param minValue     Minimum numeric bound.
-   * @param maxValue     Maximum numeric bound.
-   * @param defaultValue Initial starting value.
-   */
-  public Slider(int x, int y, int width, int height, double minValue, double maxValue,
-      double defaultValue) {
-    super(x, y, width, height, minValue, maxValue, defaultValue);
-  }
-
-  /**
-   * Constructs a Slider widget at origin (0, 0) with default dimensions (120x20).
-   */
   public Slider(double minValue, double maxValue, double defaultValue) {
-    super(minValue, maxValue, defaultValue);
+    super(0, 0, 0, 0);
+    this.minValue = minValue;
+    this.maxValue = maxValue;
+    this.value = EverMath.clamp(defaultValue, minValue, maxValue);
+    this.handle = new Button() {
+      @Override
+      public boolean isHovered(double pointX, double pointY) {
+        return Slider.this.isHovered(pointX, pointY);
+      }
+    };
+    this.label = new Label();
+    this.handle.setParent(this);
+    this.label.setParent(this);
   }
 
-  // --- SUBCLASS SPECIFIC FLUENT BUILDERS ---
-
-  public Slider setTrackHeight(int trackHeight) {
-    this.trackHeight = trackHeight;
-    return this;
+  public Slider() {
+    this(0.0D, 100.0D, 0.0D);
   }
 
-  public Slider trackHeight(int trackHeight) {
-    return setTrackHeight(trackHeight);
+  public Button getHandle() {
+    return this.handle;
   }
 
-  public Slider setColors(int background, int filled, int handle, int handleHover) {
-    this.backgroundColor = background;
-    this.filledColor = filled;
-    this.handleColor = handle;
-    this.handleHoverColor = handleHover;
-    return this;
+  public Label getLabel() {
+    return this.label;
   }
 
-  public Slider colors(int background, int filled, int handle, int handleHover) {
-    return setColors(background, filled, handle, handleHover);
+  public double getStep() {
+    return this.step;
   }
 
-  public Slider setBorder(Border border, BorderColor borderColor) {
-    this.border = border;
-    this.borderColor = borderColor;
-    return this;
+  public Slider step(double step) {
+    this.step = Math.max(0.0D, step);
+    return self();
   }
 
-  public Slider border(Border border, BorderColor borderColor) {
-    return setBorder(border, borderColor);
+  public int getHandleWidth() {
+    return this.handleWidth;
   }
 
-  // --- RENDERING TEMPLATE ---
+  public Slider handleWidth(int width) {
+    this.handleWidth = width;
+    return self();
+  }
+
+  public String getText() {
+    return this.text != null ? this.text.getString() : "";
+  }
+
+  public Component getComponent() {
+    return this.text;
+  }
+
+  public Slider text(String text) {
+    this.text = Component.literal(text);
+    return self();
+  }
+
+  public Slider text(Component text) {
+    this.text = text;
+    return self();
+  }
+
+  public int getLabelOffsetX() {
+    return this.labelOffsetX;
+  }
+
+  public int getLabelOffsetY() {
+    return this.labelOffsetY;
+  }
+
+  public Slider labelOffset(int x, int y) {
+    this.labelOffsetX = x;
+    this.labelOffsetY = y;
+    return self();
+  }
+
+  public Slider onChange(Consumer<Double> action) {
+    this.onChangeAction = action;
+    return self();
+  }
+
+  public Slider onChange(Runnable action) {
+    this.onChangeAction = slider -> action.run();
+    return self();
+  }
+
+  public double getValue() {
+    return this.value;
+  }
+
+  public Slider value(double value) {
+    double newValue = EverMath.clamp(value, this.minValue, this.maxValue);
+    if (this.step > 0.0D) {
+      newValue = Math.round((newValue - this.minValue) / this.step) * this.step + this.minValue;
+      newValue = EverMath.clamp(newValue, this.minValue, this.maxValue);
+    }
+    if (Double.compare(this.value, newValue) != 0) {
+      this.value = newValue;
+      if (this.onChangeAction != null) {
+        this.onChangeAction.accept(this.value);
+      }
+    }
+    return self();
+  }
+
+  protected void updateValueFromMouse(double mouseX) {
+    int usableWidth = this.width - this.handleWidth;
+    if (usableWidth <= 0) {
+      return;
+    }
+    double relativeX =
+        EverMath.clamp(mouseX - getGlobalX() - (this.handleWidth / 2.0), 0, usableWidth);
+    double ratio = relativeX / usableWidth;
+    value(this.minValue + ratio * (this.maxValue - this.minValue));
+  }
 
   @Override
-  public void render(EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-    if (!isVisible()) {
+  public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    if (super.mouseClicked(mouseX, mouseY, button)) {
+      if (button == 0) {
+        this.dragging = true;
+        this.updateValueFromMouse(mouseX);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    if (button == 0 && this.dragging) {
+      this.dragging = false;
+      return true;
+    }
+    return super.mouseReleased(mouseX, mouseY, button);
+  }
+
+  @Override
+  public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX,
+      double dragY) {
+    if (this.canInteract() && this.dragging) {
+      this.updateValueFromMouse(mouseX);
+      return true;
+    }
+    return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+  }
+
+  @Override
+  protected void renderContent(
+      EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    double ratio = (this.maxValue > this.minValue)
+        ? (this.value - this.minValue) / (this.maxValue - this.minValue)
+        : 0;
+
+    int handleX = (int) (ratio * (this.width - this.handleWidth));
+
+    this.handle.enabled(this.enabled);
+    this.handle.bounds(handleX, 0, this.handleWidth, this.height);
+
+    this.handle.render(graphics, mouseX, mouseY, partialTicks);
+    this.renderLabel(graphics, mouseX, mouseY, partialTicks);
+  }
+
+  protected void renderLabel(
+      EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    if (this.text == null || this.text.getString().isBlank()) {
       return;
     }
 
-    // 1. Calculate Track Boundaries
-    int trackY = this.y + (this.height - this.trackHeight) / 2;
+    String formattedText = String.format("%s: %.0f%%", this.text.getString(), this.value);
 
-    // 2. Render Track Background
-    graphics.drawRect(this.x, trackY, this.width, this.trackHeight, this.backgroundColor,
-        this.border, this.borderColor);
+    EverFont font = this.getFont();
+    int textX = 0;
+    int textY = 0;
 
-    // 3. Render Track Active Fill (uses normalized value)
-    int handleX = this.x + getHandleXOffset();
-    int filledWidth = handleX - this.x + (this.handleWidth / 2);
-    if (filledWidth > 0) {
-      graphics.drawRect(this.x, trackY, filledWidth, this.trackHeight, this.filledColor);
+    if (this.labelOffsetX > 0) {
+      textX = this.labelOffsetX;
+    } else {
+      int textWidth = font.width(formattedText);
+      int padLeft = this.getContentPaddingLeft();
+      int padRight = this.getContentPaddingRight();
+
+      if (this.textAlign == TextAlignment.CENTER) {
+        textX = (this.width / 2) - (textWidth / 2);
+      } else if (this.textAlign == TextAlignment.RIGHT) {
+        textX = this.width - textWidth - padRight;
+      } else {
+        textX = padLeft;
+      }
     }
 
-    // 4. Calculate Handle Coordinates & Hover State
-    int handleY = this.y + (this.height - this.handleHeight) / 2;
-    boolean handleHovered = mouseX >= handleX && mouseX <= handleX + this.handleWidth
-        && mouseY >= handleY && mouseY <= handleY + this.handleHeight;
+    if (this.labelOffsetY > 0) {
+      textY = this.labelOffsetY;
+    } else {
+      int fontHeight = font.fontHeight();
+      int padTop = this.getContentPaddingTop();
+      int padBottom = this.getContentPaddingBottom();
 
-    int currentHandleColor = (handleHovered || (isMouseOver(mouseX, mouseY) && this.enabled))
-        ? this.handleHoverColor
-        : this.handleColor;
+      int availableHeight = this.height - padTop - padBottom;
+      textY = padTop + (availableHeight - fontHeight) / 2;
+    }
 
-    // 5. Render Handle
-    graphics.drawRect(handleX, handleY, this.handleWidth, this.handleHeight, currentHandleColor,
-        this.border, this.borderColor);
+    this.label.enabled(this.enabled);
+    this.label.position(textX, textY);
+    this.label.fontShadow(true);
+    this.label.text(formattedText);
+
+    this.label.render(graphics, mouseX, mouseY, partialTicks);
   }
 }
