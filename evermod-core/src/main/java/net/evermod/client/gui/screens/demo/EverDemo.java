@@ -7,8 +7,6 @@ import net.minecraft.network.chat.Component;
 
 public class EverDemo extends EverScreen {
 
-  private double sliderValue = 30.0D;
-
   public EverDemo() {
     super(Component.literal("EverUI Layout Demonstration"));
   }
@@ -32,15 +30,18 @@ public class EverDemo extends EverScreen {
 
     this.add(Vanilla.slider()
         .position(20, 100)
-        .value(this.sliderValue)
-        .text("Value")
+        .value(30.0D)
+        .text(val -> String.format("Volume: %.0f%%", val))
         .onChange(val -> {
-          this.sliderValue = val;
-          System.out.println(String.format("Checked: %s", val));
+          System.out.println(String.format("Volume: %s", val));
         }));
 
-    this.add(Vanilla.checkbox()
+    this.add(Vanilla.percentSlider("Música", 80.0D)
         .position(20, 130)
+        .onChange(val -> System.out.println(String.format("Musica: %s", val))));
+
+    this.add(Vanilla.checkbox()
+        .position(20, 160)
         .text("Check de prueba")
         .onChange(() -> System.out.println("Check clicked!")));
   }

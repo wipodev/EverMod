@@ -7,6 +7,7 @@ import net.evermod.client.gui.core.AbstractWidget;
 import net.evermod.math.EverMath;
 import net.minecraft.network.chat.Component;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Slider extends AbstractWidget<Slider> {
 
@@ -17,9 +18,9 @@ public class Slider extends AbstractWidget<Slider> {
   protected int handleWidth = 8;
   protected boolean dragging = false;
   protected Consumer<Double> onChangeAction;
+  private Function<Double, String> textFormatter;
   protected final Button handle;
   protected final Label label;
-  private Component text;
   private int labelOffsetX = 0;
   private int labelOffsetY = 0;
 
@@ -70,20 +71,28 @@ public class Slider extends AbstractWidget<Slider> {
   }
 
   public String getText() {
-    return this.text != null ? this.text.getString() : "";
+    return this.label.getText();
   }
 
   public Component getComponent() {
-    return this.text;
+    return this.label.getComponent();
   }
 
   public Slider text(String text) {
-    this.text = Component.literal(text);
+    this.label.text(text);
     return self();
   }
 
   public Slider text(Component text) {
-    this.text = text;
+    this.label.text(text);
+    return self();
+  }
+
+  public Slider text(Function<Double, String> formatter) {
+    this.textFormatter = formatter;
+    if (this.textFormatter != null) {
+      this.label.text(this.textFormatter.apply(this.value));
+    }
     return self();
   }
 
@@ -123,6 +132,9 @@ public class Slider extends AbstractWidget<Slider> {
     }
     if (Double.compare(this.value, newValue) != 0) {
       this.value = newValue;
+      if (this.textFormatter != null) {
+        this.label.text(this.textFormatter.apply(this.value));
+      }
       if (this.onChangeAction != null) {
         this.onChangeAction.accept(this.value);
       }
@@ -190,11 +202,10 @@ public class Slider extends AbstractWidget<Slider> {
 
   protected void renderLabel(
       EverGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-    if (this.text == null || this.text.getString().isBlank()) {
+    String displayText = this.label.getText();
+    if (displayText == null || displayText.isBlank()) {
       return;
     }
-
-    String formattedText = String.format("%s: %.0f%%", this.text.getString(), this.value);
 
     EverFont font = this.getFont();
     int textX = 0;
@@ -203,7 +214,7 @@ public class Slider extends AbstractWidget<Slider> {
     if (this.labelOffsetX > 0) {
       textX = this.labelOffsetX;
     } else {
-      int textWidth = font.width(formattedText);
+      int textWidth = font.width(displayText);
       int padLeft = this.getContentPaddingLeft();
       int padRight = this.getContentPaddingRight();
 
@@ -230,7 +241,6 @@ public class Slider extends AbstractWidget<Slider> {
     this.label.enabled(this.enabled);
     this.label.position(textX, textY);
     this.label.fontShadow(true);
-    this.label.text(formattedText);
 
     this.label.render(graphics, mouseX, mouseY, partialTicks);
   }

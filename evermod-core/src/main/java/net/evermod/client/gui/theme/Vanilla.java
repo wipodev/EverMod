@@ -8,6 +8,7 @@ import net.evermod.client.gui.widget.Button;
 import net.evermod.client.gui.widget.Checkbox;
 import net.evermod.client.gui.widget.Label;
 import net.evermod.client.gui.widget.Slider;
+import net.evermod.math.EverMath;
 import net.evermod.resources.EverLocation;
 import net.minecraft.resources.ResourceLocation;
 
@@ -38,6 +39,15 @@ public final class Vanilla {
         .fontShadow(true);
   }
 
+  public static Checkbox checkbox() {
+    Checkbox checkbox = new Checkbox(false)
+        .padding(2);
+    checkbox.getBox()
+        .background(0xFF222222)
+        .border(Border.DEFAULT, BorderColor.all(0xFF000000), BorderColor.all(0xFFFFFFFF));
+    return checkbox;
+  }
+
   public static Slider slider() {
     Slider slider = new Slider()
         .size(120, 20)
@@ -50,12 +60,17 @@ public final class Vanilla {
     return slider;
   }
 
-  public static Checkbox checkbox() {
-    Checkbox checkbox = new Checkbox(false)
-        .padding(2);
-    checkbox.getBox()
-        .background(0xFF222222)
-        .border(Border.DEFAULT, BorderColor.all(0xFF000000), BorderColor.all(0xFFFFFFFF));
-    return checkbox;
+  public static Slider percentSlider(String label, double defaultValue) {
+    return slider()
+        .step(1.0D)
+        .text(val -> String.format("%s: %.0f%%", label, val))
+        .value(defaultValue);
+  }
+
+  public static Slider optionSlider(String[] options, int defaultIndex) {
+    return slider()
+        .step(1.0D)
+        .text(val -> options[(int) EverMath.clamp(val.intValue(), 0, options.length - 1)])
+        .value((double) defaultIndex);
   }
 }
