@@ -1,15 +1,33 @@
 package net.evermod.client.graphics.font;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.network.chat.Component;
 
 /**
- * Version-agnostic font rendering interface.
- * Abstracts font measurements and text drawing pipelines across Minecraft versions.
+ * Abstract base implementation of {@link EverFont} that handles common font operations.
+ * Subclasses only need to bridge version-specific drawInBatch calls.
  *
  * @author Wipodev
  */
-public interface EverFont {
+public abstract class EverFont {
+
+  protected final Font font = Minecraft.getInstance().font;
+
+  /**
+   * Internal bridge method to execute version-specific drawInBatch for plain text.
+   */
+  protected abstract void renderBatch(String text, float x, float y, int color, boolean shadow,
+      PoseStack pose, BufferSource bufferSource);
+
+  /**
+   * Internal bridge method to execute version-specific drawInBatch for formatted sequences.
+   */
+  protected abstract void renderBatch(Component text, float x, float y, int color, boolean shadow,
+      PoseStack pose, BufferSource bufferSource);
 
   /**
    * Draws a plain string at the specified coordinates.
@@ -21,7 +39,18 @@ public interface EverFont {
    * @param color ARGB color code
    * @param shadow whether to render text shadow
    */
-  void drawString(PoseStack poseStack, String text, float x, float y, int color, boolean shadow);
+  public void drawString(
+      PoseStack poseStack, String text, float x, float y, int color, boolean shadow) {
+    if (text == null || text.isEmpty()) {
+      return;
+    }
+    RenderSystem.disableDepthTest();
+    BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+
+    this.renderBatch(text, x, y, color, shadow, poseStack, bufferSource);
+
+    bufferSource.endBatch();
+  }
 
   /**
    * Draws a formatted Component at the specified coordinates.
@@ -33,8 +62,18 @@ public interface EverFont {
    * @param color ARGB color code
    * @param shadow whether to render text shadow
    */
-  void drawString(PoseStack poseStack, Component component, float x, float y, int color,
-      boolean shadow);
+  public void drawString(
+      PoseStack poseStack, Component component, float x, float y, int color, boolean shadow) {
+    if (component == null) {
+      return;
+    }
+    RenderSystem.disableDepthTest();
+    BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+
+    this.renderBatch(component, x, y, color, shadow, poseStack, bufferSource);
+
+    bufferSource.endBatch();
+  }
 
   /**
    * Calculates the width in pixels of a given plain string.
@@ -42,7 +81,9 @@ public interface EverFont {
    * @param text input string
    * @return pixel width of the rendered string
    */
-  int width(String text);
+  public int width(String text) {
+    return text == null ? 0 : this.font.width(text);
+  }
 
   /**
    * Calculates the width in pixels of a formatted Component.
@@ -50,14 +91,18 @@ public interface EverFont {
    * @param component input text component
    * @return pixel width of the rendered component
    */
-  int width(Component component);
+  public int width(Component component) {
+    return component == null ? 0 : this.font.width(component);
+  }
 
   /**
    * Gets the line height of the font in pixels (typically 9 in vanilla Minecraft).
    *
    * @return font height in pixels
    */
-  int fontHeight();
+  public int fontHeight() {
+    return this.font.lineHeight;
+  }
 
   /**
    * Truncates a string so that its total rendered width does not exceed the maximum allowed width.
@@ -66,7 +111,9 @@ public interface EverFont {
    * @param maxWidth maximum width in pixels
    * @return substring fitting within specified pixel constraint
    */
-  String plainSubstrByWidth(String text, int maxWidth);
+  public String plainSubstrByWidth(String text, int maxWidth) {
+    return this.font.plainSubstrByWidth(text, maxWidth);
+  }
 
   /**
    * Truncates a string so that its total rendered width does not exceed the maximum allowed width.
@@ -76,5 +123,7 @@ public interface EverFont {
    * @param reverse if true, trims from right-to-left
    * @return substring fitting within specified pixel constraint
    */
-  String plainSubstrByWidth(String text, int maxWidth, boolean reverse);
+  public String plainSubstrByWidth(String text, int maxWidth, boolean reverse) {
+    return this.font.plainSubstrByWidth(text, maxWidth, reverse);
+  }
 }
