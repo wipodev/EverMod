@@ -1,5 +1,6 @@
 package net.evermod.client.graphics.font;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -21,6 +22,7 @@ public class MCEverFont implements EverFont {
     if (text == null || text.isEmpty()) {
       return;
     }
+    RenderSystem.disableDepthTest();
     MultiBufferSource.BufferSource bufferSource =
         Minecraft.getInstance().renderBuffers().bufferSource();
     this.font.drawInBatch(text, x, y, color, shadow, poseStack.last().pose(), bufferSource, false,
@@ -34,6 +36,7 @@ public class MCEverFont implements EverFont {
     if (component == null) {
       return;
     }
+    RenderSystem.disableDepthTest();
     MultiBufferSource.BufferSource bufferSource =
         Minecraft.getInstance().renderBuffers().bufferSource();
     this.font.drawInBatch(component.getVisualOrderText(), x, y, color, shadow,

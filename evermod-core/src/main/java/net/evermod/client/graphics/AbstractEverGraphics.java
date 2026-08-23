@@ -53,23 +53,24 @@ public abstract class AbstractEverGraphics {
     return FONT;
   }
 
-  public void enableBlend() {
+  public void setupTexShader() {
     RenderSystem.enableBlend();
     RenderSystem.defaultBlendFunc();
-  }
-
-  public void disableBlend() {
-    RenderSystem.disableBlend();
+    RenderSystem.disableDepthTest();
+    RenderSystem.setShader(GameRenderer::getPositionTexShader);
   }
 
   protected void setupColorShader() {
     RenderSystem.enableBlend();
     RenderSystem.defaultBlendFunc();
+    RenderSystem.disableDepthTest();
     RenderSystem.setShader(GameRenderer::getPositionColorShader);
   }
 
-  public void resetColor() {
+  protected void restoreState() {
     RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    RenderSystem.disableBlend();
+    RenderSystem.disableDepthTest();
   }
 
   public void setColor(float red, float green, float blue, float alpha) {
@@ -127,24 +128,24 @@ public abstract class AbstractEverGraphics {
   protected static void fillTrapezoid(IEverBufferBuilder builder, EverMatrix4f matrix,
       float x1, float y1, float x2, float y2,
       float x3, float y3, float x4, float y4,
-      GradientStyle style) {
+      float z, GradientStyle style) {
 
-    builder.vertex(matrix, x1, y1, 0.0F, style.r1(), style.g1(), style.b1(), style.a1());
-    builder.vertex(matrix, x2, y2, 0.0F, style.r2(), style.g2(), style.b2(), style.a2());
-    builder.vertex(matrix, x3, y3, 0.0F, style.r3(), style.g3(), style.b3(), style.a3());
-    builder.vertex(matrix, x4, y4, 0.0F, style.r4(), style.g4(), style.b4(), style.a4());
+    builder.vertex(matrix, x1, y1, z, style.r1(), style.g1(), style.b1(), style.a1());
+    builder.vertex(matrix, x2, y2, z, style.r2(), style.g2(), style.b2(), style.a2());
+    builder.vertex(matrix, x3, y3, z, style.r3(), style.g3(), style.b3(), style.a3());
+    builder.vertex(matrix, x4, y4, z, style.r4(), style.g4(), style.b4(), style.a4());
   }
 
   protected static void blitTrapezoid(
       IEverBufferBuilder builder, EverMatrix4f matrix,
       float x1, float y1, float x2, float y2,
       float x3, float y3, float x4, float y4,
-      float minU, float maxU, float minV, float maxV) {
+      float z, float minU, float maxU, float minV, float maxV) {
 
-    builder.vertex(matrix, x1, y1, 0.0F, minU, maxV);
-    builder.vertex(matrix, x2, y2, 0.0F, maxU, maxV);
-    builder.vertex(matrix, x3, y3, 0.0F, maxU, minV);
-    builder.vertex(matrix, x4, y4, 0.0F, minU, minV);
+    builder.vertex(matrix, x1, y1, z, minU, maxV);
+    builder.vertex(matrix, x2, y2, z, maxU, maxV);
+    builder.vertex(matrix, x3, y3, z, maxU, minV);
+    builder.vertex(matrix, x4, y4, z, minU, minV);
   }
 
   public void fill(int x1, int y1, int x2, int y2, GradientStyle style) {
@@ -158,10 +159,10 @@ public abstract class AbstractEverGraphics {
         x2, y2, // Bottom-Right
         x2, y1, // Top-Right
         x1, y1, // Top-Left
-        style);
+        0.0F, style);
 
     TESSELATOR.draw();
-    this.disableBlend();
+    this.restoreState();
   }
 
   public void fillBorder(InnerBounds bounds, Border border, BorderColor borderColor) {
@@ -189,7 +190,7 @@ public abstract class AbstractEverGraphics {
           bounds.innerX2(), bounds.innerY(), // Bottom-Right
           bounds.x2(), bounds.y(), //           Top-Right
           bounds.x(), bounds.y(), //            Top-Left
-          borderTop);
+          0.0F, borderTop);
     }
     if (border.right() > 0) {
       fillTrapezoid(builder, matrix,
@@ -197,7 +198,7 @@ public abstract class AbstractEverGraphics {
           bounds.x2(), bounds.y2(),
           bounds.x2(), bounds.y(),
           bounds.innerX2(), bounds.innerY(),
-          borderRight);
+          0.0F, borderRight);
     }
     if (border.bottom() > 0) {
       fillTrapezoid(builder, matrix,
@@ -205,7 +206,7 @@ public abstract class AbstractEverGraphics {
           bounds.x2(), bounds.y2(),
           bounds.innerX2(), bounds.innerY2(),
           bounds.innerX(), bounds.innerY2(),
-          borderBottom);
+          0.0F, borderBottom);
     }
     if (border.left() > 0) {
       fillTrapezoid(builder, matrix,
@@ -213,11 +214,11 @@ public abstract class AbstractEverGraphics {
           bounds.innerX(), bounds.innerY2(),
           bounds.innerX(), bounds.innerY(),
           bounds.x(), bounds.y(),
-          borderLeft);
+          0.0F, borderLeft);
     }
 
     TESSELATOR.draw();
-    RenderSystem.disableBlend();
+    this.restoreState();
   }
 
   public void fillFlatBorder(InnerBounds bounds, Border border, GradientStyle borderStyle) {
@@ -266,9 +267,7 @@ public abstract class AbstractEverGraphics {
 
     EverMatrix4f matrix = this.getActiveMatrix();
 
-    this.enableBlend();
-    RenderSystem.enableDepthTest();
-    RenderSystem.setShader(GameRenderer::getPositionTexShader);
+    this.setupTexShader();
     RenderSystem.setShaderTexture(0, texture);
     this.setColor(red, green, blue, alpha);
 
@@ -280,11 +279,10 @@ public abstract class AbstractEverGraphics {
         x2, y2, // Bottom-Right
         x2, y1, // Top-Right
         x1, y1, // Top-Left
-        minU, maxU, minV, maxV);
+        0.0F, minU, maxU, minV, maxV);
 
     TESSELATOR.draw();
-    this.resetColor();
-    this.disableBlend();
+    this.restoreState();
   }
 
   public void drawString(String text, int x, int y, int color, boolean shadow) {

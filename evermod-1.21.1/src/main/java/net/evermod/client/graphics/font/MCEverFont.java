@@ -1,5 +1,6 @@
 package net.evermod.client.graphics.font;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -18,6 +19,10 @@ public class MCEverFont implements EverFont {
   @Override
   public void drawString(PoseStack poseStack, String text, float x, float y, int color,
       boolean shadow) {
+    if (text == null || text.isEmpty()) {
+      return;
+    }
+    RenderSystem.disableDepthTest();
     MultiBufferSource.BufferSource bufferSource =
         Minecraft.getInstance().renderBuffers().bufferSource();
     this.font.drawInBatch(text, x, y, color, shadow, poseStack.last().pose(), bufferSource,
@@ -28,6 +33,10 @@ public class MCEverFont implements EverFont {
   @Override
   public void drawString(PoseStack poseStack, Component component, float x, float y, int color,
       boolean shadow) {
+    if (component == null) {
+      return;
+    }
+    RenderSystem.disableDepthTest();
     MultiBufferSource.BufferSource bufferSource =
         Minecraft.getInstance().renderBuffers().bufferSource();
     this.font.drawInBatch(component.getVisualOrderText(), x, y, color, shadow,
@@ -37,12 +46,12 @@ public class MCEverFont implements EverFont {
 
   @Override
   public int width(String text) {
-    return this.font.width(text);
+    return text == null ? 0 : this.font.width(text);
   }
 
   @Override
   public int width(Component component) {
-    return this.font.width(component);
+    return component == null ? 0 : this.font.width(component);
   }
 
   @Override

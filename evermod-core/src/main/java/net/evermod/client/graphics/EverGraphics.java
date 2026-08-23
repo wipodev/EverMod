@@ -154,12 +154,12 @@ public class EverGraphics extends AbstractEverGraphics {
   }
 
   public void drawCenteredString(String text, int x, int y, int color, boolean shadow) {
-    int textWidth = this.FONT.width(text);
+    int textWidth = FONT.width(text);
     drawString(text, x - textWidth / 2, y, color, shadow);
   }
 
   public void drawCenteredString(Component component, int x, int y, int color, boolean shadow) {
-    int textWidth = this.FONT.width(component);
+    int textWidth = FONT.width(component);
     drawString(component, x - textWidth / 2, y, color, shadow);
   }
 }
