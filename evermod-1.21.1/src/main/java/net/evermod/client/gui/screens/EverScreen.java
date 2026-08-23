@@ -67,6 +67,12 @@ public abstract class EverScreen extends Screen implements IEverScreen {
   }
 
   @Override
+  public void mouseMoved(double mouseX, double mouseY) {
+    this.handleMouseMoved(mouseX, mouseY);
+    super.mouseMoved(mouseX, mouseY);
+  }
+
+  @Override
   public boolean mouseClicked(double mouseX, double mouseY, int button) {
     if (this.handleMouseClicked(mouseX, mouseY, button)) {
       return true;
@@ -105,6 +111,14 @@ public abstract class EverScreen extends Screen implements IEverScreen {
       return true;
     }
     return super.keyPressed(keyCode, scanCode, modifiers);
+  }
+
+  @Override
+  public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    if (this.handleKeyReleased(keyCode, scanCode, modifiers)) {
+      return true;
+    }
+    return super.keyReleased(keyCode, scanCode, modifiers);
   }
 
   @Override
