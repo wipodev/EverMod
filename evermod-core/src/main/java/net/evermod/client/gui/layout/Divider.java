@@ -1,7 +1,8 @@
 package net.evermod.client.gui.layout;
 
-import net.evermod.client.gui.AbstractComponent;
-import net.evermod.client.gui.EverGraphics;
+import net.evermod.client.graphics.EverGraphics;
+import net.evermod.client.gui.api.Renderable;
+import net.evermod.client.gui.core.UINode;
 
 /**
  * A decorative layout divider component used to draw thin horizontal or vertical
@@ -9,14 +10,13 @@ import net.evermod.client.gui.EverGraphics;
  *
  * @author Wipodev
  */
-public class Divider extends AbstractComponent {
+public class Divider extends UINode implements Renderable {
 
   /**
    * Orientation modes available for line rendering.
    */
   public enum Orientation {
-    HORIZONTAL,
-    VERTICAL
+    HORIZONTAL, VERTICAL
   }
 
   private Orientation orientation;
