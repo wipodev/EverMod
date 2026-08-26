@@ -138,10 +138,14 @@ public abstract class AbstractEverGraphics {
       float x3, float y3, float x4, float y4,
       float z, GradientStyle style) {
 
-    builder.vertex(matrix, x1, y1, z, style.r1(), style.g1(), style.b1(), style.a1());
-    builder.vertex(matrix, x2, y2, z, style.r2(), style.g2(), style.b2(), style.a2());
-    builder.vertex(matrix, x3, y3, z, style.r3(), style.g3(), style.b3(), style.a3());
-    builder.vertex(matrix, x4, y4, z, style.r4(), style.g4(), style.b4(), style.a4());
+    builder.vertex(matrix, x1, y1, z).color(style.r1(), style.g1(), style.b1(), style.a1())
+        .endVertex();
+    builder.vertex(matrix, x2, y2, z).color(style.r2(), style.g2(), style.b2(), style.a2())
+        .endVertex();
+    builder.vertex(matrix, x3, y3, z).color(style.r3(), style.g3(), style.b3(), style.a3())
+        .endVertex();
+    builder.vertex(matrix, x4, y4, z).color(style.r4(), style.g4(), style.b4(), style.a4())
+        .endVertex();
   }
 
   protected static void blitTrapezoid(
@@ -150,10 +154,10 @@ public abstract class AbstractEverGraphics {
       float x3, float y3, float x4, float y4,
       float z, float minU, float maxU, float minV, float maxV) {
 
-    builder.vertex(matrix, x1, y1, z, minU, maxV);
-    builder.vertex(matrix, x2, y2, z, maxU, maxV);
-    builder.vertex(matrix, x3, y3, z, maxU, minV);
-    builder.vertex(matrix, x4, y4, z, minU, minV);
+    builder.vertex(matrix, x1, y1, z).uv(minU, maxV).endVertex();
+    builder.vertex(matrix, x2, y2, z).uv(maxU, maxV).endVertex();
+    builder.vertex(matrix, x3, y3, z).uv(maxU, minV).endVertex();
+    builder.vertex(matrix, x4, y4, z).uv(minU, minV).endVertex();
   }
 
   public void fill(int x1, int y1, int x2, int y2, GradientStyle style) {
