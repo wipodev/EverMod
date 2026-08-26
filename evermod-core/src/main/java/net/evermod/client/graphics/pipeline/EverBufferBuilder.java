@@ -46,6 +46,18 @@ public interface EverBufferBuilder {
   }
 
   /**
+   * Sets the position for the current vertex without matrix transformation.
+   *
+   * @param x X coordinate
+   * @param y Y coordinate
+   * @param z Z coordinate
+   * @return active buffer builder instance for chaining
+   */
+  default EverBufferBuilder vertex(double x, double y, double z) {
+    return vertex(null, x, y, z);
+  }
+
+  /**
    * Sets the UV texture coordinates for the current vertex.
    *
    * @param u U texture coordinate
