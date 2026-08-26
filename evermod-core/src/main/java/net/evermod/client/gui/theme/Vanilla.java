@@ -7,6 +7,7 @@ import net.evermod.client.gui.api.style.TextAlignment;
 import net.evermod.client.gui.widget.Button;
 import net.evermod.client.gui.widget.Checkbox;
 import net.evermod.client.gui.widget.Label;
+import net.evermod.client.gui.widget.Select;
 import net.evermod.client.gui.widget.Slider;
 import net.evermod.math.EverMath;
 import net.evermod.resources.EverLocation;
@@ -72,5 +73,22 @@ public final class Vanilla {
         .step(1.0D)
         .text(val -> options[(int) EverMath.clamp(val.intValue(), 0, options.length - 1)])
         .value((double) defaultIndex);
+  }
+
+  public static Select select() {
+    return new Select()
+        .size(120, 20)
+        .border(1)
+        .padding(4)
+        .fontShadow(true)
+        .textAlign(TextAlignment.CENTER)
+        .background(btnBase)
+        .optionStyle(option -> {
+          option.background(btnDisabled);
+          option.padding(4);
+          option.fontShadow(true);
+          option.textAlign(TextAlignment.CENTER);
+          option.border(new Border(0, 1, 1, 1), BorderColor.DEFAULT, BorderColor.all(0xFFFFFFFF));
+        });
   }
 }
