@@ -7,7 +7,7 @@ import net.evermod.math.EverMatrix4f;
  *
  * @author Wipodev
  */
-public interface IEverBufferBuilder {
+public interface EverBufferBuilder {
 
   /**
    * Adds a vertex with position and RGBA color.
@@ -22,8 +22,28 @@ public interface IEverBufferBuilder {
    * @param a alpha component (0.0F - 1.0F)
    * @return active buffer builder instance for chaining
    */
-  IEverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float r, float g,
+  EverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float r, float g,
       float b, float a);
+
+  /**
+  * Adds a vertex with position, UV texture coordinates, RGBA color, and packed lightmap coordinates.
+  *
+  * @param matrix transformation matrix
+  * @param x X coordinate
+  * @param y Y coordinate
+  * @param z Z coordinate
+  * @param u U texture coordinate
+  * @param v V texture coordinate
+  * @param r red component (0.0F - 1.0F)
+  * @param g green component (0.0F - 1.0F)
+  * @param b blue component (0.0F - 1.0F)
+  * @param a alpha component (0.0F - 1.0F)
+  * @param blockLight block light level (0 - 15)
+  * @param skyLight sky light level (0 - 15)
+  * @return active buffer builder instance for chaining
+  */
+  EverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u, float v,
+      float r, float g, float b, float a, int blockLight, int skyLight);
 
   /**
    * Adds a vertex with position, UV texture coordinates, and RGBA color.
@@ -40,7 +60,7 @@ public interface IEverBufferBuilder {
    * @param a alpha component (0.0F - 1.0F)
    * @return active buffer builder instance for chaining
    */
-  IEverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u, float v,
+  EverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u, float v,
       float r, float g, float b, float a);
 
   /**
@@ -54,5 +74,5 @@ public interface IEverBufferBuilder {
    * @param v V texture coordinate
    * @return active buffer builder instance for chaining
    */
-  IEverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u, float v);
+  EverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u, float v);
 }

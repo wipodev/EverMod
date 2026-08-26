@@ -7,9 +7,9 @@ import net.evermod.client.graphics.font.EverFont;
 import net.evermod.client.graphics.font.MCEverFont;
 import net.evermod.client.graphics.geometry.InnerBounds;
 import net.evermod.client.graphics.geometry.ScreenRectangle;
+import net.evermod.client.graphics.pipeline.MCEverTesselator;
+import net.evermod.client.graphics.pipeline.EverBufferBuilder;
 import net.evermod.client.graphics.pipeline.EverTesselator;
-import net.evermod.client.graphics.pipeline.IEverBufferBuilder;
-import net.evermod.client.graphics.pipeline.IEverTesselator;
 import net.evermod.client.graphics.scissor.ScissorStack;
 import net.evermod.client.graphics.style.Border;
 import net.evermod.client.graphics.style.BorderColor;
@@ -28,7 +28,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public abstract class AbstractEverGraphics {
 
-  protected static final IEverTesselator TESSELATOR = new EverTesselator();
+  protected static final EverTesselator TESSELATOR = new MCEverTesselator();
   protected static final EverFont FONT = new MCEverFont();
   private final ScissorStack scissorStack = new ScissorStack();
   protected final PoseStack poseStack;
@@ -43,6 +43,14 @@ public abstract class AbstractEverGraphics {
 
   public PoseStack getPoseStack() {
     return this.poseStack;
+  }
+
+  public static EverTesselator getSharedTesselator() {
+    return TESSELATOR;
+  }
+
+  public EverTesselator getTesselator() {
+    return TESSELATOR;
   }
 
   public static EverFont getSharedFont() {
@@ -125,7 +133,7 @@ public abstract class AbstractEverGraphics {
         Math.max(0, (int) screenHeight));
   }
 
-  protected static void fillTrapezoid(IEverBufferBuilder builder, EverMatrix4f matrix,
+  protected static void fillTrapezoid(EverBufferBuilder builder, EverMatrix4f matrix,
       float x1, float y1, float x2, float y2,
       float x3, float y3, float x4, float y4,
       float z, GradientStyle style) {
@@ -137,7 +145,7 @@ public abstract class AbstractEverGraphics {
   }
 
   protected static void blitTrapezoid(
-      IEverBufferBuilder builder, EverMatrix4f matrix,
+      EverBufferBuilder builder, EverMatrix4f matrix,
       float x1, float y1, float x2, float y2,
       float x3, float y3, float x4, float y4,
       float z, float minU, float maxU, float minV, float maxV) {
@@ -152,7 +160,7 @@ public abstract class AbstractEverGraphics {
     EverMatrix4f matrix = this.getActiveMatrix();
     this.setupColorShader();
 
-    IEverBufferBuilder builder = TESSELATOR.beginPositionColor();
+    EverBufferBuilder builder = TESSELATOR.beginPositionColor();
 
     fillTrapezoid(builder, matrix,
         x1, y2, // Bottom-Left
@@ -182,7 +190,7 @@ public abstract class AbstractEverGraphics {
 
     EverMatrix4f matrix = this.getActiveMatrix();
     this.setupColorShader();
-    IEverBufferBuilder builder = TESSELATOR.beginPositionColor();
+    EverBufferBuilder builder = TESSELATOR.beginPositionColor();
 
     if (border.top() > 0) {
       fillTrapezoid(builder, matrix,
@@ -271,7 +279,7 @@ public abstract class AbstractEverGraphics {
     RenderSystem.setShaderTexture(0, texture);
     this.setColor(red, green, blue, alpha);
 
-    IEverBufferBuilder builder = TESSELATOR.beginPositionTex();
+    EverBufferBuilder builder = TESSELATOR.beginPositionTex();
 
     blitTrapezoid(
         builder, matrix,

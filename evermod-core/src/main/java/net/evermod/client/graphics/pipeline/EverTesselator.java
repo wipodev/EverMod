@@ -5,21 +5,28 @@ package net.evermod.client.graphics.pipeline;
  *
  * @author Wipodev
  */
-public interface IEverTesselator {
+public interface EverTesselator {
 
   /**
    * Begins building vertices for position-color primitives.
    *
    * @return active buffer builder instance
    */
-  IEverBufferBuilder beginPositionColor();
+  EverBufferBuilder beginPositionColor();
 
   /**
    * Begins building vertices for position-texture primitives.
    *
    * @return active buffer builder instance
    */
-  IEverBufferBuilder beginPositionTex();
+  EverBufferBuilder beginPositionTex();
+
+  /**
+   * Begins building vertices for particle primitives.
+   *
+   * @return active buffer builder instance
+   */
+  EverBufferBuilder beginParticle();
 
   /**
    * Flushes and renders accumulated buffer data to active shader.

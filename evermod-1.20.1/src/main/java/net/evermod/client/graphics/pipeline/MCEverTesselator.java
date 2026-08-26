@@ -12,41 +12,57 @@ import net.evermod.math.EverMatrix4f;
  *
  * @author Wipodev
  */
-public class EverTesselator implements IEverTesselator, IEverBufferBuilder {
+public class MCEverTesselator implements EverTesselator, EverBufferBuilder {
 
   private final Tesselator tesselator = Tesselator.getInstance();
   private BufferBuilder builder;
 
   @Override
-  public IEverBufferBuilder beginPositionColor() {
+  public EverBufferBuilder beginPositionColor() {
     this.builder = this.tesselator.getBuilder();
     this.builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
     return this;
   }
 
   @Override
-  public IEverBufferBuilder beginPositionTex() {
+  public EverBufferBuilder beginPositionTex() {
     this.builder = this.tesselator.getBuilder();
     this.builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
     return this;
   }
 
   @Override
-  public IEverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float r, float g,
+  public EverBufferBuilder beginParticle() {
+    this.builder = this.tesselator.getBuilder();
+    this.builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+    return this;
+  }
+
+  @Override
+  public EverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float r, float g,
       float b, float a) {
     this.builder.vertex(matrix.getHandle(), x, y, z).color(r, g, b, a).endVertex();
     return this;
   }
 
   @Override
-  public IEverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u, float v,
+  public EverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u, float v,
+      float r, float g, float b, float a, int blockLight, int skyLight) {
+    int packedLight = (skyLight << 16) | blockLight;
+    this.builder.vertex(matrix.getHandle(), x, y, z).uv(u, v).color(r, g, b, a).uv2(packedLight)
+        .endVertex();
+    return this;
+  }
+
+  @Override
+  public EverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u, float v,
       float r, float g, float b, float a) {
     this.builder.vertex(matrix.getHandle(), x, y, z).uv(u, v).color(r, g, b, a).endVertex();
     return this;
   }
 
   @Override
-  public IEverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u,
+  public EverBufferBuilder vertex(EverMatrix4f matrix, float x, float y, float z, float u,
       float v) {
     this.builder.vertex(matrix.getHandle(), x, y, z).uv(u, v).endVertex();
     return this;
