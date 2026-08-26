@@ -12,6 +12,7 @@ import net.evermod.client.gui.api.Renderable;
 import net.evermod.client.gui.api.TooltipProvider;
 import net.evermod.client.gui.api.style.Alignable;
 import net.evermod.client.gui.layout.LayoutAlignment;
+import net.evermod.client.gui.overlay.OverlayManager;
 
 /**
  * Abstract base class for UI containers.
@@ -29,6 +30,7 @@ public abstract class AbstractContainer<T extends AbstractContainer<T>>
   protected final List<UINode> children = new ArrayList<>();
   protected UINode focusedChild = null;
   protected boolean initialized = false;
+  protected final OverlayManager overlayManager = new OverlayManager();
 
   protected LayoutAlignment alignment = LayoutAlignment.START;
   protected int gap = 0;
@@ -138,16 +140,24 @@ public abstract class AbstractContainer<T extends AbstractContainer<T>>
     }
   }
 
-  public void renderOverlayPass(EverGraphics graphics, int mouseX, int mouseY) {
+  protected void renderOverlayPass(EverGraphics graphics, int mouseX, int mouseY) {
     for (UINode child : this.children) {
-      if (child.isVisible()) {
-        if (child instanceof OverlayProvider provider && provider.isOverlayActive()) {
-          provider.renderOverlay(graphics, mouseX, mouseY);
-        }
-        if (child instanceof AbstractContainer<?> parentChild) {
-          parentChild.renderOverlayPass(graphics, mouseX, mouseY);
-        }
+      if (!child.isVisible()) {
+        continue;
       }
+
+      if (child instanceof OverlayProvider provider && provider.isOverlayActive()) {
+        this.overlayManager.enqueue(provider);
+      }
+
+      if (child instanceof AbstractContainer<?> container) {
+        container.renderOverlayPass(graphics, mouseX, mouseY);
+      }
+    }
+
+    // Flush only if this is the root node
+    if (this.parent == null) {
+      this.overlayManager.flush(graphics, mouseX, mouseY);
     }
   }
 
@@ -186,19 +196,57 @@ public abstract class AbstractContainer<T extends AbstractContainer<T>>
   }
 
   @Override
-  public void mouseMoved(double mouseX, double mouseY) {
+  public boolean mouseMoved(double mouseX, double mouseY) {
     if (!this.visible || !this.enabled) {
-      return;
+      return false;
     }
     ensureInitialized();
 
     double localX = mouseX - this.x;
     double localY = mouseY - this.y;
+    boolean handled = false;
 
     for (int i = this.children.size() - 1; i >= 0; i--) {
       UINode child = this.children.get(i);
-      if (child.canInteract()) {
-        ((Interactive) child).mouseMoved(localX, localY);
+      if (child.canInteract() && child instanceof OverlayProvider provider
+          && provider.isOverlayActive()) {
+        if (child instanceof Interactive interactive) {
+          if (!handled) {
+            handled = interactive.mouseMoved(localX, localY);
+          } else {
+            clearHoverState(child);
+          }
+        }
+      }
+    }
+
+    for (int i = this.children.size() - 1; i >= 0; i--) {
+      UINode child = this.children.get(i);
+      if (!child.canInteract() || (child instanceof OverlayProvider provider
+          && provider.isOverlayActive())) {
+        continue;
+      }
+
+      if (child instanceof Interactive interactive) {
+        if (!handled) {
+          handled = interactive.mouseMoved(localX, localY);
+        } else {
+          clearHoverState(child);
+        }
+      }
+    }
+    return handled;
+  }
+
+  /**
+   * Recursively clears the hover state of a node and its children.
+   */
+  private void clearHoverState(UINode node) {
+    if (node instanceof AbstractWidget<?> widget) {
+      widget.hovered = false;
+    } else if (node instanceof AbstractContainer<?> container) {
+      for (UINode child : container.getChildren()) {
+        clearHoverState(child);
       }
     }
   }
@@ -212,6 +260,18 @@ public abstract class AbstractContainer<T extends AbstractContainer<T>>
 
     double localX = mouseX - this.x;
     double localY = mouseY - this.y;
+
+    for (int i = this.children.size() - 1; i >= 0; i--) {
+      UINode child = this.children.get(i);
+      if (child.canInteract() && child instanceof OverlayProvider provider
+          && provider.isOverlayActive()) {
+        Interactive interactive = (Interactive) child;
+        if (interactive.mouseClicked(localX, localY, button)) {
+          this.focusedChild = child;
+          return true;
+        }
+      }
+    }
 
     for (int i = this.children.size() - 1; i >= 0; i--) {
       UINode child = this.children.get(i);

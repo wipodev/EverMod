@@ -69,8 +69,6 @@ public abstract class AbstractWidget<T extends AbstractWidget<T>>
     }
 
     autoSize();
-    this.hovered = this.isHovered(mouseX, mouseY);
-
     graphics.push();
     graphics.translate(this.x, this.y, 0.0F);
 
@@ -152,8 +150,9 @@ public abstract class AbstractWidget<T extends AbstractWidget<T>>
   }
 
   @Override
-  public void mouseMoved(double mouseX, double mouseY) {
+  public boolean mouseMoved(double mouseX, double mouseY) {
     this.hovered = this.isHovered(mouseX, mouseY);
+    return this.hovered;
   }
 
   @Override
