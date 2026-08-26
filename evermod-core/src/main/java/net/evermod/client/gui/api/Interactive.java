@@ -17,13 +17,17 @@ public interface Interactive {
      */
   boolean isHovered(double pointX, double pointY);
 
+  default void setHovered(boolean hovered) {};
+
   /**
    * Called when the mouse cursor is moved within or across the component boundaries.
    *
    * @param mouseX Current cursor X position.
    * @param mouseY Current cursor Y position.
    */
-  default void mouseMoved(double mouseX, double mouseY) {}
+  default boolean mouseMoved(double mouseX, double mouseY) {
+    return false;
+  }
 
   /**
    * Called when a mouse button is pressed over or targeted at this component.
