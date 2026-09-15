@@ -13,6 +13,7 @@ import net.evermod.client.gui.api.TooltipProvider;
 import net.evermod.client.gui.api.style.Alignable;
 import net.evermod.client.gui.layout.LayoutAlignment;
 import net.evermod.client.gui.overlay.OverlayManager;
+import net.evermod.client.gui.overlay.ToolTipManager;
 
 /**
  * Abstract base class for UI containers.
@@ -31,6 +32,7 @@ public abstract class AbstractContainer<T extends AbstractContainer<T>>
   protected UINode focusedChild = null;
   protected boolean initialized = false;
   protected final OverlayManager overlayManager = new OverlayManager();
+  protected final ToolTipManager toolTipManager = new ToolTipManager();
 
   protected LayoutAlignment alignment = LayoutAlignment.START;
   protected int gap = 0;
@@ -162,15 +164,32 @@ public abstract class AbstractContainer<T extends AbstractContainer<T>>
   }
 
   public void renderTooltipPass(EverGraphics graphics, int mouseX, int mouseY) {
+    if (isPointOccludedByOverlay(mouseX - this.x, mouseY - this.y)) {
+      // If the mouse is directly over an active overlay bounds, 
+      // underlying non-overlay tooltips must be suppressed.
+      return;
+    }
+
     for (UINode child : this.children) {
-      if (child.isVisible()) {
-        if (child instanceof TooltipProvider provider
-            && provider.isTooltipActive(mouseX, mouseY)) {
-          provider.renderTooltip(graphics, mouseX, mouseY);
-        }
-        if (child instanceof AbstractContainer<?> parentChild) {
-          parentChild.renderTooltipPass(graphics, mouseX, mouseY);
-        }
+      if (!child.isVisible()) {
+        continue;
+      }
+
+      if (child instanceof TooltipProvider provider
+          && provider.isTooltipActive(mouseX, mouseY)) {
+
+        System.out
+            .println("[DEBUG-TOOLTIP] Dibujando Tooltip de: " + child.getClass().getSimpleName()
+                + " | Mouse Global: (" + mouseX + ", " + mouseY + ")");
+        this.toolTipManager.enqueue(provider, mouseX, mouseY);
+      }
+
+      if (child instanceof AbstractContainer<?> parentChild) {
+        parentChild.renderTooltipPass(graphics, mouseX, mouseY);
+      }
+
+      if (this.parent == null) {
+        this.toolTipManager.flush(graphics, mouseX, mouseY);
       }
     }
   }
@@ -228,14 +247,42 @@ public abstract class AbstractContainer<T extends AbstractContainer<T>>
       }
 
       if (child instanceof Interactive interactive) {
-        if (!handled) {
-          handled = interactive.mouseMoved(localX, localY);
+        boolean occluded = isPointOccludedByOverlay(localX, localY);
+
+        if (!handled && !occluded) {
+          boolean wasHandled = interactive.mouseMoved(localX, localY);
+          if (wasHandled) {
+            System.out.println("[DEBUG-MOUSE] Evento capturado por elemento normal: "
+                + child.getClass().getSimpleName());
+            handled = true;
+          }
         } else {
           clearHoverState(child);
         }
       }
     }
     return handled;
+  }
+
+  /**
+  * Checks if a local coordinate is currently covered by any active overlay.
+  */
+  private boolean isPointOccludedByOverlay(double localX, double localY) {
+    for (UINode child : this.children) {
+      if (child.canInteract() && child instanceof OverlayProvider provider
+          && provider.isOverlayActive()) {
+
+        boolean contains = child.containsPoint(localX, localY);
+        System.out.println("[DEBUG-OCLUSION] Overlay activa: " + child.getClass().getSimpleName()
+            + " | Mouse Local: (" + localX + ", " + localY + ")"
+            + " | Overlay Bounds Check: " + contains);
+
+        if (contains) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**
