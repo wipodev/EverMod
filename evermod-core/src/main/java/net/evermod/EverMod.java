@@ -1,6 +1,5 @@
 package net.evermod;
 
-import net.evermod.client.input.ClientInputHandler;
 import net.evermod.config.ConfigManager;
 import net.evermod.logging.EverLogger;
 import net.evermod.network.ChannelManager;
@@ -48,6 +47,5 @@ public class EverMod {
         modid);
     ChannelManager.autoRegister(modid);
     ConfigManager.init(modid, modEventBus);
-    ClientInputHandler.register(modEventBus);
   }
 }
