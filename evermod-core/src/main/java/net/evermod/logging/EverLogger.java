@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 public class EverLogger {
 
   private final Logger logger;
-  private final String modId;
+  private final String modName;
   private final boolean infoEnabled;
   private final boolean logEnabled;
   private final boolean debugEnabled;
@@ -25,7 +25,7 @@ public class EverLogger {
   /**
    * Constructs an EverLogger instance with custom log level toggles.
    *
-   * @param modId The unique identifier of the mod using EverMod (e.g., "mymod").
+   * @param modName The unique identifier of the mod using EverMod (e.g., "mymod").
    * @param info Enable or disable INFO messages.
    * @param log Enable or disable custom level LOG messages.
    * @param debug Enable or disable DEBUG messages.
@@ -34,10 +34,10 @@ public class EverLogger {
    * @param error Enable or disable ERROR messages.
    * @param fatal Enable or disable FATAL messages.
    */
-  public EverLogger(String modId, boolean info, boolean log, boolean debug, boolean trace,
+  public EverLogger(String modName, boolean info, boolean log, boolean debug, boolean trace,
       boolean warn, boolean error, boolean fatal) {
-    this.modId = modId;
-    this.logger = LogManager.getLogger(modId);
+    this.modName = modName;
+    this.logger = LogManager.getLogger(modName);
     this.infoEnabled = info;
     this.logEnabled = log;
     this.debugEnabled = debug;
@@ -50,10 +50,10 @@ public class EverLogger {
   /**
    * Constructs a simplified EverLogger instance with all log levels enabled by default.
    *
-   * @param modId The unique identifier of the mod using EverMod.
+   * @param modName The unique identifier of the mod using EverMod.
    */
-  public EverLogger(String modId) {
-    this(modId, true, true, true, true, true, true, true);
+  public EverLogger(String modName) {
+    this(modName, true, true, true, true, true, true, true);
   }
 
   // --- LOGGING METHODS ---
@@ -161,7 +161,7 @@ public class EverLogger {
   }
 
   /**
-   * Analyzes the call stack to construct a log prefix containing the mod ID, 
+   * Analyzes the call stack to construct a log prefix containing the mod Name, 
    * simple caller class name, and method name.
    *
    * @return A formatted prefix string for log entries.
@@ -180,9 +180,9 @@ public class EverLogger {
       String simpleClassName = fullClassName.substring(fullClassName.lastIndexOf('.') + 1);
       String methodName = caller.getMethodName();
 
-      return "[" + modId + "-" + simpleClassName + "-" + methodName + "]: ";
+      return "[" + this.modName + "-" + simpleClassName + "-" + methodName + "]: ";
     }
 
-    return "[" + modId + "]: ";
+    return "[" + this.modName + "]: ";
   }
 }

@@ -8,12 +8,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 /**
  * Main initialization class for the EverMod Framework.
  * 
- * <p><strong>Intellectual Property & Trademark Notice:</strong><br>
- * This source code is injected into the target mod's SourceSets under the LGPLv3 license.
- * The "EverMod" name and framework identity are the exclusive property of <code>Wipodev</code>.
- * Source code injection does not grant rights to use the "EverMod" trademark for third-party mod branding.
- * </p>
- * 
  * @author Wipodev
  */
 public class EverMod {
@@ -21,8 +15,8 @@ public class EverMod {
   public static final String EVER_ID = "evermod";
   public static final String AUTHOR = "Wipodev";
   public static final String FRAMEWORK_NAME = "EverMod Framework";
-  public static final String VERSION = "2.0.0";
-  public static final EverLogger LOGGER = new EverLogger("EverMod");
+  public static final String VERSION = "0.1.0";
+  public static final EverLogger LOGGER = new EverLogger(FRAMEWORK_NAME);
 
   /**
   * Private constructor to prevent direct instantiation of utility class.
