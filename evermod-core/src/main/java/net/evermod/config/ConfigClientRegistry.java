@@ -1,17 +1,16 @@
 package net.evermod.config;
 
+import net.evermod.context.IEverContext;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 public class ConfigClientRegistry {
 
-  @SuppressWarnings("removal")
-  public static void registerScreen() {
+  public static void registerScreen(IEverContext context) {
     if (FMLEnvironment.dist == Dist.CLIENT) {
-      ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
+      context.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
           () -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parentScreen) -> {
             // Si el desarrollador definió su propia pantalla, la instanciamos por reflexión
             if (ConfigManager.customScreenClass != null) {

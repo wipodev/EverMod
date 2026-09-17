@@ -1,7 +1,9 @@
 package net.evermod.context;
 
+import java.util.function.Supplier;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -27,5 +29,11 @@ public class EverContext implements IEverContext {
   @Override
   public void registerConfig(ForgeConfigSpec spec, String fileName) {
     ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, spec, fileName);
+  }
+
+  @Override
+  public <T extends Record & IExtensionPoint<T>> void registerExtensionPoint(
+      Class<? extends IExtensionPoint<T>> point, Supplier<T> extension) {
+    ModLoadingContext.get().registerExtensionPoint(point, extension);
   }
 }

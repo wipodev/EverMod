@@ -1,7 +1,9 @@
 package net.evermod.context;
 
+import java.util.function.Supplier;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.IExtensionPoint;
 
 /**
  * Interface defining version-agnostic mod context operations.
@@ -24,4 +26,7 @@ public interface IEverContext {
    * @param fileName Target config file name.
    */
   void registerConfig(ForgeConfigSpec spec, String fileName);
+
+  <T extends Record & IExtensionPoint<T>> void registerExtensionPoint(
+      Class<? extends IExtensionPoint<T>> point, Supplier<T> extension);
 }

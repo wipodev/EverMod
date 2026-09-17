@@ -1,11 +1,9 @@
 package net.evermod.config;
 
 import net.evermod.EverMod;
+import net.evermod.context.IEverContext;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.objectweb.asm.Type;
@@ -50,8 +48,7 @@ public class ConfigManager {
     }
   }
 
-  @SuppressWarnings("removal")
-  public static void init(String modid, IEventBus modEventBus) {
+  public static void init(String modid, IEverContext context) {
     ModFileScanData scanData = ModList.get().getModFileById(modid).getFile().getScanResult();
     ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
@@ -116,31 +113,31 @@ public class ConfigManager {
     }
 
     if (!hasConfigAnnotations && ENTRIES.isEmpty()) {
-      EverMod.LOGGER.info("No se encontraron configuraciones para el mod: " + modid + ". Omitiendo registro de pantalla y archivo config.");
+      EverMod.LOGGER.info("No se encontraron configuraciones para el mod: " + modid
+          + ". Omitiendo registro de pantalla y archivo config.");
       return;
     }
 
     spec = builder.build();
 
     // Registrar la especificación en Forge usando el entorno común
-    ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, spec,
-        "evermod-" + modid + ".toml");
+    context.registerConfig(spec, "evermod-" + modid + ".toml");
 
-    modEventBus.addListener((ModConfigEvent.Loading event) -> {
+    context.getEventBus().addListener((ModConfigEvent.Loading event) -> {
       if (event.getConfig().getSpec() == spec) {
         ENTRIES.forEach(ConfigEntry::syncToField);
         isConfigLoaded = true;
       }
     });
 
-    modEventBus.addListener((ModConfigEvent.Reloading event) -> {
+    context.getEventBus().addListener((ModConfigEvent.Reloading event) -> {
       if (event.getConfig().getSpec() == spec) {
         ENTRIES.forEach(ConfigEntry::syncToField);
       }
     });
 
     // Registrar el apartado visual
-    ConfigClientRegistry.registerScreen();
+    ConfigClientRegistry.registerScreen(context);
   }
 
   @SuppressWarnings("unchecked")
