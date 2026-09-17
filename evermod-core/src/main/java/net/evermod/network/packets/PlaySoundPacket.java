@@ -3,7 +3,6 @@ package net.evermod.network.packets;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import net.evermod.client.handlers.ClientSoundHandler;
-import net.evermod.network.annotations.EverPacket;
 import net.evermod.network.io.EverBuffer;
 import net.evermod.network.io.EverContext;
 import net.minecraft.sounds.SoundEvent;
@@ -13,7 +12,6 @@ import net.minecraftforge.registries.ForgeRegistries;
  * Network packet responsible for triggering, transitioning, or stopping sound events
  * on the client side for specific entities.
  */
-@EverPacket
 public class PlaySoundPacket extends PacketBase {
 
   private final int entityId;

@@ -1,5 +1,6 @@
 package net.evermod.server.sounds;
 
+import net.evermod.EverMod;
 import net.evermod.network.ChannelManager;
 import net.evermod.network.packets.PlaySoundPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -247,9 +248,9 @@ public class EverSound {
     PlaySoundPacket packet = new PlaySoundPacket(sourceId, sound, volume, pitch, targetVolume,
         targetPitch, transitionTicks, state, looping);
     if (player != null) {
-      ChannelManager.sendToClient(packet, player);
+      ChannelManager.sendToClient(EverMod.EVER_ID, packet, player);
     } else {
-      ChannelManager.sendToAllClients(packet);
+      ChannelManager.sendToAllClients(EverMod.EVER_ID, packet);
     }
   }
 }

@@ -3,6 +3,10 @@ package net.evermod;
 import net.evermod.config.ConfigManager;
 import net.evermod.logging.EverLogger;
 import net.evermod.network.ChannelManager;
+import net.evermod.network.NetworkAdapter;
+import net.evermod.network.annotations.EverPacketDirection;
+import net.evermod.network.packets.PlaySoundPacket;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 /**
@@ -10,6 +14,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
  * 
  * @author Wipodev
  */
+@Mod(EverMod.EVER_ID)
 public class EverMod {
 
   public static final String EVER_ID = "evermod";
@@ -19,11 +24,15 @@ public class EverMod {
   public static final EverLogger LOGGER = new EverLogger(FRAMEWORK_NAME);
 
   /**
-  * Private constructor to prevent direct instantiation of utility class.
-  */
-  private EverMod() {
-    throw new UnsupportedOperationException(
-        "EverMod is an initialization utility class and cannot be instantiated.");
+   * Main constructor executed directly by Forge during mod discovery.
+   */
+  public EverMod() {
+    LOGGER.info("{} v{} by {} has been loaded as a library mod.", FRAMEWORK_NAME, VERSION, AUTHOR);
+
+    ChannelManager.init(new NetworkAdapter());
+    ChannelManager.register(EVER_ID);
+    ChannelManager.registerPacket(EVER_ID, PlaySoundPacket.class,
+        buffer -> PlaySoundPacket.decode(buffer), EverPacketDirection.TO_CLIENT);
   }
 
   /**
