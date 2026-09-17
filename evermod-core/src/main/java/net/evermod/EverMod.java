@@ -31,7 +31,6 @@ public class EverMod {
     LOGGER.info("{} v{} by {} has been loaded as a library mod.", FRAMEWORK_NAME, VERSION, AUTHOR);
 
     ChannelManager.init(new NetworkAdapter());
-    ChannelManager.register(EVER_ID);
     ChannelManager.registerPacket(EVER_ID, PlaySoundPacket.class,
         buffer -> PlaySoundPacket.decode(buffer), EverPacketDirection.TO_CLIENT);
   }
