@@ -1,13 +1,14 @@
 package net.evermod;
 
 import net.evermod.config.ConfigManager;
+import net.evermod.context.IEverContext;
 import net.evermod.logging.EverLogger;
 import net.evermod.network.ChannelManager;
 import net.evermod.network.NetworkAdapter;
 import net.evermod.network.annotations.EverPacketDirection;
 import net.evermod.network.packets.PlaySoundPacket;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
  * Main initialization class for the EverMod Framework.
@@ -26,7 +27,7 @@ public class EverMod {
   /**
    * Main constructor executed directly by Forge during mod discovery.
    */
-  public EverMod() {
+  public EverMod(FMLJavaModLoadingContext context) {
     LOGGER.info("{} v{} by {} has been loaded as a library mod.", FRAMEWORK_NAME, VERSION, AUTHOR);
 
     ChannelManager.init(new NetworkAdapter());
@@ -41,7 +42,7 @@ public class EverMod {
    * @param modid The unique identifier of the mod leveraging the framework.
    * @param modEventBus The mod event bus provided by Forge.
    */
-  public static void init(String modid, IEventBus modEventBus) {
+  public static void init(String modid, IEverContext context) {
     if (modid == null || modid.isEmpty()) {
       throw new IllegalArgumentException("The Mod ID cannot be null or empty.");
     }
@@ -49,6 +50,6 @@ public class EverMod {
     LOGGER.info("Initializing {} v{} by {} for target mod: {}", FRAMEWORK_NAME, VERSION, AUTHOR,
         modid);
     ChannelManager.autoRegister(modid);
-    ConfigManager.init(modid, modEventBus);
+    ConfigManager.init(modid, context);
   }
 }

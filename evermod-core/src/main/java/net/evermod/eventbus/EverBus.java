@@ -13,7 +13,10 @@ public class EverBus {
    * Suppresses both removal and unused suppression warnings across legacy and modern Forge toolchains.
    *
    * @return The {@link IEventBus} instance for mod event registration.
+   * 
+   * @deprecated use {@link FMLJavaModLoadingContext} in your mod constructor
    */
+  @Deprecated(forRemoval = true, since = "1.21.1")
   @SuppressWarnings({"removal", "all"})
   public static IEventBus getBus() {
     return FMLJavaModLoadingContext.get().getModEventBus();
