@@ -36,4 +36,8 @@ public class EverContext implements IEverContext {
       Class<? extends IExtensionPoint<T>> point, Supplier<T> extension) {
     ModLoadingContext.get().registerExtensionPoint(point, extension);
   }
+
+  public static FMLJavaModLoadingContext get() {
+    return ModLoadingContext.get().extension();
+  }
 }

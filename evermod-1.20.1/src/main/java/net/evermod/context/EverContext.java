@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -34,5 +35,10 @@ public class EverContext implements IEverContext {
   public <T extends Record & IExtensionPoint<T>> void registerExtensionPoint(
       Class<? extends IExtensionPoint<T>> point, Supplier<T> extension) {
     context.registerExtensionPoint(point, extension);
+  }
+
+  @SuppressWarnings("removal")
+  public static FMLJavaModLoadingContext get() {
+    return ModLoadingContext.get().extension();
   }
 }

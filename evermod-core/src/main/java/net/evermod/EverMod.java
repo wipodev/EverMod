@@ -1,6 +1,7 @@
 package net.evermod;
 
 import net.evermod.config.ConfigManager;
+import net.evermod.context.EverContext;
 import net.evermod.context.IEverContext;
 import net.evermod.logging.EverLogger;
 import net.evermod.network.ChannelManager;
@@ -23,6 +24,10 @@ public class EverMod {
   public static final String FRAMEWORK_NAME = "EverMod Framework";
   public static final String VERSION = "0.1.0";
   public static final EverLogger LOGGER = new EverLogger(FRAMEWORK_NAME);
+
+  public EverMod() {
+    this(EverContext.get());
+  }
 
   /**
    * Main constructor executed directly by Forge during mod discovery.
