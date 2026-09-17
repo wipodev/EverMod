@@ -1,34 +1,64 @@
 package net.evermod.config;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.objectweb.asm.Type;
 import net.evermod.EverMod;
 import net.evermod.context.IEverContext;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.forgespi.language.ModFileScanData;
-import org.objectweb.asm.Type;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Multi-mod configuration manager handling annotation scanning, spec building,
+ * and synchronized field updates.
+ *
+ * @author Wipodev
+ */
 public class ConfigManager {
+
   public static final List<ConfigEntry> ENTRIES = new ArrayList<>();
+  private static final Map<String, ForgeConfigSpec> SPECS = new ConcurrentHashMap<>();
+  private static final Map<String, Boolean> LOADED_STATES = new ConcurrentHashMap<>();
   protected static Class<?> customScreenClass = null;
-  private static ForgeConfigSpec spec;
-  private static boolean isConfigLoaded = false;
 
   public static class ConfigEntry {
+    protected final String modid;
     protected final Field field;
     protected final EverProperty<?> property;
     protected final String category;
     protected ForgeConfigSpec.ConfigValue<?> forgeValue;
 
-    public ConfigEntry(Field field, EverProperty<?> property, String category) {
+    public ConfigEntry(String modid, Field field, EverProperty<?> property, String category) {
+      this.modid = modid;
       this.field = field;
       this.property = property;
       this.category = category;
+    }
+
+    public String getModid() {
+      return modid;
+    }
+
+    public Field getField() {
+      return field;
+    }
+
+    public EverProperty<?> getProperty() {
+      return property;
+    }
+
+    public String getCategory() {
+      return category;
+    }
+
+    public ForgeConfigSpec.ConfigValue<?> getForgeValue() {
+      return forgeValue;
     }
 
     public void syncToField() {
@@ -38,7 +68,7 @@ public class ConfigManager {
           updatePropertyValue(property, currentForge);
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        EverMod.LOGGER.error("Error syncing field {}", field.getName(), e);
       }
     }
 
@@ -59,13 +89,14 @@ public class ConfigManager {
         try {
           customScreenClass = Class.forName(data.memberName());
         } catch (ClassNotFoundException e) {
-          e.printStackTrace();
+          EverMod.LOGGER.error("Custom screen class not found: {}", data.memberName(), e);
         }
         continue;
       }
 
-      if (!data.annotationType().equals(Type.getType(EverConfig.class)))
+      if (!data.annotationType().equals(Type.getType(EverConfig.class))) {
         continue;
+      }
 
       hasConfigAnnotations = true;
 
@@ -85,8 +116,9 @@ public class ConfigManager {
             property.setId(configId);
 
             Object def = property.getDefaultValue();
-            if (!property.getComment().isEmpty())
+            if (!property.getComment().isEmpty()) {
               builder.comment(property.getComment());
+            }
 
             ForgeConfigSpec.ConfigValue<?> forgeVal;
             if (def instanceof Integer i) {
@@ -101,60 +133,68 @@ public class ConfigManager {
               forgeVal = builder.define(configId, def.toString());
             }
 
-            ConfigEntry entry = new ConfigEntry(field, property, category);
+            ConfigEntry entry = new ConfigEntry(modid, field, property, category);
             entry.forgeValue = forgeVal;
             ENTRIES.add(entry);
           }
         }
         builder.pop();
       } catch (Exception e) {
-        throw new RuntimeException("Error procesando clases de configuración", e);
+        throw new RuntimeException("Error processing config classes for mod: " + modid, e);
       }
     }
 
-    if (!hasConfigAnnotations && ENTRIES.isEmpty()) {
-      EverMod.LOGGER.info("No se encontraron configuraciones para el mod: " + modid
-          + ". Omitiendo registro de pantalla y archivo config.");
+    if (!hasConfigAnnotations && ENTRIES.stream().noneMatch(e -> e.getModid().equals(modid))) {
+      EverMod.LOGGER.info(
+          "No configurations found for mod: {}. Skipping screen and config file registration.",
+          modid);
       return;
     }
 
-    spec = builder.build();
+    ForgeConfigSpec modSpec = builder.build();
+    SPECS.put(modid, modSpec);
+    LOADED_STATES.put(modid, false);
 
-    // Registrar la especificación en Forge usando el entorno común
-    context.registerConfig(spec, "evermod-" + modid + ".toml");
+    context.registerConfig(modSpec, "evermod-" + modid + ".toml");
 
     context.getEventBus().addListener((ModConfigEvent.Loading event) -> {
-      if (event.getConfig().getSpec() == spec) {
-        ENTRIES.forEach(ConfigEntry::syncToField);
-        isConfigLoaded = true;
+      if (event.getConfig().getSpec() == modSpec) {
+        ENTRIES.stream()
+            .filter(e -> e.getModid().equals(modid))
+            .forEach(ConfigEntry::syncToField);
+        LOADED_STATES.put(modid, true);
       }
     });
 
     context.getEventBus().addListener((ModConfigEvent.Reloading event) -> {
-      if (event.getConfig().getSpec() == spec) {
-        ENTRIES.forEach(ConfigEntry::syncToField);
+      if (event.getConfig().getSpec() == modSpec) {
+        ENTRIES.stream()
+            .filter(e -> e.getModid().equals(modid))
+            .forEach(ConfigEntry::syncToField);
       }
     });
 
-    // Registrar el apartado visual
     ConfigClientRegistry.registerScreen(context);
   }
 
   @SuppressWarnings("unchecked")
   public static void setAndSync(ConfigEntry entry, Object newValue) {
-    if (!isConfigLoaded || entry.forgeValue == null) {
+    String modid = entry.getModid();
+    boolean isLoaded = LOADED_STATES.getOrDefault(modid, false);
+    ForgeConfigSpec modSpec = SPECS.get(modid);
+
+    if (!isLoaded || entry.forgeValue == null || modSpec == null) {
       EverMod.LOGGER.info(
-          "Guardado omitido: El sistema de configuracion de Forge no se ha cargado por completo aun.");
+          "Save omitted: Forge configuration system for mod '{}' is not fully loaded yet.", modid);
       return;
     }
 
     try {
       ((ForgeConfigSpec.ConfigValue<Object>) entry.forgeValue).set(newValue);
       entry.syncToField();
-      spec.save();
+      modSpec.save();
     } catch (Exception e) {
-      EverMod.LOGGER.error("Error al guardar la configuracion: " + entry.field.getName());
-      e.printStackTrace();
+      EverMod.LOGGER.error("Error saving configuration for field: {}", entry.field.getName(), e);
     }
   }
 }
